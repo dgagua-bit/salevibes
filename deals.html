@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="ka">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>აქციები და პროდუქტები — SaleVibes</title>
+<meta name="description" content="ერთიანი ძიება: პროდუქტები ფასის ისტორიით და მაღაზიების მოქმედი აქციები. ფილტრები, დალაგება, Deal Score და სავარაუდო ფასი საქართველოში.">
+<meta name="theme-color" content="#FAF8F4">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='16' fill='%23F3E4E6'/%3E%3Ctext x='16' y='22' font-family='Georgia' font-size='18' text-anchor='middle' fill='%238E3B46'%3ES%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://fyfanpmszhopxjaerubd.supabase.co" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Georgian:wght@400;500;600;700&family=Noto+Serif+Georgian:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/main.css">
+<script type="module" src="assets/js/pages/deals.js"></script>
+</head>
+<body>
+<a class="skip" href="#main">გადასვლა მთავარ შიგთავსზე</a>
+<header data-sv-header></header>
+<main id="main">
+<div class="wrap">
+  <div class="page-head">
+    <p class="eyebrow">აქციები</p>
+    <h1>ძიება და შეთავაზებები</h1>
+    <form class="hero-search" id="q-form" role="search"><label class="sr-only" for="q">ძიება</label><input id="q" name="q" type="search" placeholder="პროდუქტი, ბრენდი, მოდელი, SKU, მაღაზია ან კატეგორია" autocomplete="off"><button class="btn btn-primary" type="submit">ძიება</button></form>
+  </div>
+  <div class="search-layout">
+    <details class="filters" id="filters" open>
+      <summary>ფილტრები <span class="muted" id="f-count"></span></summary>
+      <div class="fgroup"><label>კატეგორია<select id="f-cat"><option value="">ყველა</option></select></label></div>
+      <div class="fgroup"><label>მაღაზია<select id="f-store"><option value="">ყველა</option></select></label><label>ქვეყანა<select id="f-country"><option value="">ყველა</option></select></label></div>
+      <div class="fgroup" data-only="products"><label>ბრენდი<select id="f-brand"><option value="">ყველა</option></select></label></div>
+      <div class="fgroup" data-only="products"><span class="field">ფასი (მაღაზიის ვალუტაში)</span><div class="range"><label><span class="sr-only">მინიმუმი</span><input id="f-min" type="number" min="0" inputmode="decimal" placeholder="დან"></label><label><span class="sr-only">მაქსიმუმი</span><input id="f-max" type="number" min="0" inputmode="decimal" placeholder="მდე"></label></div></div>
+      <div class="fgroup"><label>მინ. ფასდაკლება<select id="f-disc"><option value="0">ნებისმიერი</option><option value="10">10%+</option><option value="20">20%+</option><option value="30">30%+</option><option value="50">50%+</option></select></label></div>
+      <div class="fgroup" data-only="products"><label>მინ. Deal Score<select id="f-score"><option value="0">ნებისმიერი</option><option value="40">40+</option><option value="60">60+</option><option value="70">70+</option></select></label>
+        <label class="check"><input type="checkbox" id="f-only-disc"> მხოლოდ ფასდაკლებით</label></div>
+      <div class="fgroup"><label class="check"><input type="checkbox" id="f-saved"> მხოლოდ რჩეულები</label>
+        <p class="fine">ზომისა და ფერის ფილტრი დაემატება, როცა მაღაზიების მონაცემებში ეს ველები გამოჩნდება. ახლა საჯაროდ მხოლოდ მარაგში არსებული შეთავაზებები ჩანს.</p>
+        <button type="button" class="btn btn-ghost" id="f-reset" style="width:100%">ფილტრების გასუფთავება</button></div>
+    </details>
+    <div>
+      <div class="results-bar">
+        <div class="seg" role="group" aria-label="შედეგის ტიპი"><button type="button" data-type="all" aria-pressed="true">ყველა</button><button type="button" data-type="products" aria-pressed="false">პროდუქტები</button><button type="button" data-type="deals" aria-pressed="false">მაღაზიის აქციები</button></div>
+        <label class="sort"><span>დალაგება</span><select id="sort"><option value="score">საუკეთესო Deal Score</option><option value="discount">ყველაზე დიდი ფასდაკლება</option><option value="price">ყველაზე დაბალი ფასი</option><option value="landed">ყველაზე იაფი საქართველოში</option><option value="new">უახლესი</option></select></label>
+      </div>
+      <div class="active-filters" id="chips"></div>
+      <p class="sr-only" id="live" role="status" aria-live="polite"></p>
+      <div id="results"></div>
+    </div>
+  </div>
+</div>
+</main>
+<footer data-sv-footer></footer>
+<noscript><p class="wrap notice">SaleVibes-ის მონაცემების საჩვენებლად საჭიროა JavaScript.</p></noscript>
+</body>
+</html>

@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="ka">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ინსტრუმენტები — SaleVibes</title>
+<meta name="description" content="საქართველოში ჩამოტანის კალკულატორი, გადამზიდავების ტარიფები, საბაჟო წესები და ფასების შედარება ქვეყნებს შორის.">
+<meta name="theme-color" content="#FAF8F4">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='16' fill='%23F3E4E6'/%3E%3Ctext x='16' y='22' font-family='Georgia' font-size='18' text-anchor='middle' fill='%238E3B46'%3ES%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://fyfanpmszhopxjaerubd.supabase.co" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Georgian:wght@400;500;600;700&family=Noto+Serif+Georgian:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/main.css">
+<script type="module" src="assets/js/pages/tools.js"></script>
+</head>
+<body>
+<a class="skip" href="#main">გადასვლა მთავარ შიგთავსზე</a>
+<header data-sv-header></header>
+<main id="main">
+<div class="wrap">
+  <div class="page-head"><p class="eyebrow">ინსტრუმენტები</p><h1>რა დამიჯდება საქართველოში?</h1><p>ნივთის ფასი + შიდა მიწოდება + საერთაშორისო ტრანსპორტირება + მომსახურება + საბაჟო = სავარაუდო სრული ღირებულება. ყველა დაშვება მონიშნულია.</p></div>
+  <nav class="chips" aria-label="ინსტრუმენტები"><a class="chip" href="#calc">კალკულატორი</a><a class="chip" href="#carriers">გადამზიდავები</a><a class="chip" href="#customs">საბაჟო</a><a class="chip" href="#compare">ფასები ქვეყნებს შორის</a></nav>
+
+  <section class="section" id="calc" aria-labelledby="calc-h">
+    <div class="calc-grid">
+      <form class="panel" id="calc-form" autocomplete="off" onsubmit="return false">
+        <div class="panel-head"><h2 id="calc-h">ჩამოტანის კალკულატორი</h2></div>
+        <p class="fine" id="fx-line">კურსი იტვირთება…</p>
+        <div class="fields">
+          <label class="field">ნივთის ფასი<input id="c-price" type="number" min="0" step="0.01" inputmode="decimal" value="80"></label>
+          <label class="field">ვალუტა<select id="c-cur"><option value="EUR">€ ევრო</option><option value="USD">$ დოლარი</option><option value="GBP">£ ფუნტი</option><option value="GEL">₾ ლარი</option></select></label>
+          <label class="field">შიდა მიწოდება <span class="hint">(მაღაზია → საწყობი, იგივე ვალუტა)</span><input id="c-dom" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0 = უფასო"></label>
+          <label class="field">მაღაზიის ქვეყანა<select id="c-origin"></select></label>
+          <label class="field">გადამზიდავი<select id="c-carrier"></select></label>
+          <label class="field">ტარიფი $/კგ <span class="hint" id="c-rate-hint"></span><input id="c-rate" type="number" min="0" step="0.05" inputmode="decimal"></label>
+          <label class="field">წონა (კგ)<input id="c-kg" type="number" min="0" step="0.1" inputmode="decimal" value="1"></label>
+          <div class="field">ზომები სმ <span class="hint">(მოცულობითი წონისთვის, არასავალდებულო)</span><div class="dims"><input id="c-l" type="number" min="0" inputmode="decimal" placeholder="სიგრძე" aria-label="სიგრძე სმ"><input id="c-w" type="number" min="0" inputmode="decimal" placeholder="სიგანე" aria-label="სიგანე სმ"><input id="c-h" type="number" min="0" inputmode="decimal" placeholder="სიმაღლე" aria-label="სიმაღლე სმ"></div></div>
+          <label class="field">მომსახურების საფასური ₾<input id="c-fee" type="number" min="0" step="0.5" inputmode="decimal" placeholder="0"></label>
+          <label class="field">კატეგორია <span class="hint">(თუ წონა უცნობია)</span><select id="c-cat"></select></label>
+          <label class="check full"><input type="checkbox" id="c-personal" checked> პირადი მოხმარებისთვის (არაკომერციული)</label>
+          <label class="check full"><input type="checkbox" id="c-same"> 3 ან მეტი ერთნაირი ნივთი</label>
+        </div>
+      </form>
+      <div class="panel" aria-live="polite" id="calc-out"></div>
+    </div>
+  </section>
+
+  <section class="section" id="carriers" aria-labelledby="car-h">
+    <div class="section-head"><div><h2 id="car-h">გადამზიდავები და ტარიფები</h2><p>ვაჩვენებთ მხოლოდ თარიღიან წყაროს მქონე ტარიფს. სადაც მონაცემი არ გვაქვს — PENDING; ასეთ შემთხვევაში ტარიფი კალკულატორში თავად ჩაწერე.</p></div></div>
+    <div class="panel table-scroll"><table class="data-table" id="car-table"></table></div>
+  </section>
+
+  <section class="section" id="customs" aria-labelledby="cus-h">
+    <div class="section-head"><div><h2 id="cus-h">საბაჟო წესები (პირადი ამანათი)</h2></div></div>
+    <div class="panel" id="customs-box"></div>
+  </section>
+
+  <section class="section" id="compare" aria-labelledby="cmp-h">
+    <div class="section-head"><div><h2 id="cmp-h">ერთი პროდუქტი — სხვადასხვა ქვეყანაში</h2><p id="cmp-sub">ერთი და იგივე პროდუქტის ფასი სხვადასხვა ქვეყნის ოფიციალურ საიტზე, ლარში გადაყვანილი.</p></div></div>
+    <form class="hero-search" id="cmp-form" role="search"><label class="sr-only" for="cmp-q">პროდუქტის ძიება</label><input id="cmp-q" type="search" placeholder="პროდუქტის სახელი ან კოდი" autocomplete="off"><button class="btn btn-primary" type="submit">შედარება</button></form>
+    <p class="fine" id="cmp-status" role="status" aria-live="polite" style="margin-top:10px"></p>
+    <div class="panel table-scroll" id="cmp-out" hidden></div>
+    <div id="finder" hidden></div>
+  </section>
+</div>
+</main>
+<footer data-sv-footer></footer>
+<noscript><p class="wrap notice">SaleVibes-ის მონაცემების საჩვენებლად საჭიროა JavaScript.</p></noscript>
+</body>
+</html>

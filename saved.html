@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="ka">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>რჩეულები და ფასის შეტყობინებები — SaleVibes</title>
+<meta name="description" content="შენახული პროდუქტები და აქციები, სამიზნე ფასი, საყვარელი ბრენდები და ფასის შეტყობინებები.">
+<meta name="theme-color" content="#FAF8F4">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='16' fill='%23F3E4E6'/%3E%3Ctext x='16' y='22' font-family='Georgia' font-size='18' text-anchor='middle' fill='%238E3B46'%3ES%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://fyfanpmszhopxjaerubd.supabase.co" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Georgian:wght@400;500;600;700&family=Noto+Serif+Georgian:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/main.css">
+<script type="module" src="assets/js/pages/saved.js"></script>
+</head>
+<body>
+<a class="skip" href="#main">გადასვლა მთავარ შიგთავსზე</a>
+<header data-sv-header></header>
+<main id="main">
+<div class="wrap">
+  <div class="page-head"><p class="eyebrow">რჩეულები</p><h1>რჩეულები და ფასის შეტყობინებები</h1>
+  <div class="notice sage"><span aria-hidden="true">ℹ</span><span>რჩეულები და შეტყობინებები ინახება <b>მხოლოდ ამ ბრაუზერში</b> და მოწმდება, როცა SaleVibes-ს გახსნი. ელფოსტით შეტყობინებები ჯერ არ იგზავნება.</span></div></div>
+  <section class="section" aria-labelledby="al-h"><div class="section-head"><div><h2 id="al-h">შესრულებული პირობები</h2><p>პროდუქტები, რომლებმაც მიაღწიეს შენს სამიზნე ფასს ან შენი ბრენდის ფასდაკლებას.</p></div></div><div id="alerts"></div></section>
+  <section class="section" aria-labelledby="it-h"><div class="section-head"><div><h2 id="it-h">შენახული</h2></div></div><div id="items"></div></section>
+  <section class="section" aria-labelledby="pr-h">
+    <div class="section-head"><div><h2 id="pr-h">ჩემი ინტერესები</h2><p>აირჩიე ბრენდები და მინიმალური ფასდაკლება — ასეთ პროდუქტებს „შესრულებულ პირობებში“ დაგანახებთ.</p></div></div>
+    <form class="panel" id="prefs"><div class="fields"><label class="field full">ბრენდები <span class="hint">(მძიმით გამოყოფილი)</span><input id="p-brands" type="text" list="p-brand-list" placeholder="მაგ. Society Limonta, Pinko"><datalist id="p-brand-list"></datalist></label>
+      <label class="field">მინ. ფასდაკლება %<input id="p-disc" type="number" min="0" max="90" step="5" inputmode="numeric"></label></div>
+      <p style="margin-top:12px"><button class="btn btn-dark" type="submit">შენახვა</button> <span class="form-status" id="p-status" role="status"></span></p></form>
+  </section>
+  <section class="section" aria-labelledby="em-h">
+    <div class="section-head"><div><h2 id="em-h">ელფოსტის შეტყობინებები — მოლოდინის სია</h2><p>ელფოსტით გაგზავნის სისტემა ჯერ <b>არ მუშაობს</b>. თუ გინდა, პირველს შეგატყობინოთ გაშვებისას, ჩაეწერე სიაში.</p></div></div>
+    <form class="panel" id="sub-form" novalidate>
+      <div class="chips" id="sub-int" role="group" aria-label="ინტერესები"></div>
+      <div class="form-row" style="margin-top:14px"><label class="sr-only" for="sub-email">ელფოსტა</label><input id="sub-email" type="email" autocomplete="email" maxlength="254" placeholder="შენი ელფოსტა" required><button class="btn btn-dark" type="submit">სიაში ჩაწერა</button></div>
+      <label class="check" style="margin-top:10px"><input type="checkbox" id="sub-consent" required> ვეთანხმები, რომ ელფოსტა შეინახება მხოლოდ SaleVibes-ის შეთავაზებების შეტყობინებისთვის. გამოწერის გაუქმება და მონაცემის წაშლა შესაძლებელი იქნება ყოველ წერილში და მოთხოვნით.</label>
+      <p class="form-status" id="sub-status" role="status" aria-live="polite"></p>
+    </form>
+  </section>
+</div>
+</main>
+<footer data-sv-footer></footer>
+<noscript><p class="wrap notice">SaleVibes-ის მონაცემების საჩვენებლად საჭიროა JavaScript.</p></noscript>
+</body>
+</html>
