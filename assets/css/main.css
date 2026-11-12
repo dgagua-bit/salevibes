@@ -476,3 +476,8 @@ select:hover, input:hover { border-color: var(--ink); }
   .arrows { display: flex; }
   .hero-link { display: none; }
 }
+
+/* logo image */
+.logo-img { height: 74px; width: auto; display: block; }
+.site-footer .logo-img { height: 88px; }
+@media (max-width: 600px) { .logo-img { height: 54px; } .site-footer .logo-img { height: 66px; } }

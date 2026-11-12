@@ -21,7 +21,7 @@ export function mountChrome(active) {
   if (h) {
     h.className = "site-header" + (active === "home" ? " over" : "");
     h.innerHTML = `<div class="wrap header-row">
-      <a class="logo" href="./" aria-label="SaleVibes — მთავარი"><span class="logo-mark" aria-hidden="true">S</span><span>SaleVibes</span></a>
+      <a class="logo" href="./" aria-label="Sale Vibes — მთავარი"><img class="logo-img" src="assets/img/logo-dark.png" alt="Sale Vibes" width="425" height="281"></a>
       <nav class="main-nav" id="main-nav" aria-label="მთავარი ნავიგაცია"><ul><li class="nav-search"><form action="deals.html" role="search"><label class="sr-only" for="mq">ძიება</label><input id="mq" name="q" type="search" placeholder="ძიება: პროდუქტი, ბრენდი, SKU…"></form></li>${NAV.map(n => `<li><a href="${n.href}"${n.id === active ? ' aria-current="page"' : ""}>${n.label}</a></li>`).join("")}</ul></nav>
       <div class="header-tools">
         <form class="header-search" action="deals.html" role="search"><label class="sr-only" for="hq">ძიება</label><input id="hq" name="q" type="search" placeholder="პროდუქტი, ბრენდი, SKU…" autocomplete="off"><button type="submit" aria-label="ძიება">⌕</button></form>
@@ -38,7 +38,7 @@ export function mountChrome(active) {
   if (f) {
     f.className = "site-footer";
     f.innerHTML = `<div class="wrap footer-grid">
-      <div><a class="logo" href="./"><span class="logo-mark" aria-hidden="true">S</span><span>SaleVibes</span></a>
+      <div><a class="logo" href="./" aria-label="Sale Vibes — მთავარი"><img class="logo-img" src="assets/img/logo-light.png" alt="Sale Vibes" width="425" height="281"></a>
       <p>Shopping Intelligence საქართველოსთვის: რეალური აქციები, რეალური ფასები, ჩამოტანის ღირებულება და ჭკვიანი გადაწყვეტილება. SaleVibes არ ყიდის პროდუქტს.</p></div>
       <nav aria-label="ქვედა ნავიგაცია"><ul>${NAV.map(n => `<li><a href="${n.href}">${n.label}</a></li>`).join("")}<li><a href="saved.html">რჩეულები და შეტყობინებები</a></li></ul></nav>
       <div class="footer-note"><p>ფასები და პირობები ყიდვამდე მაღაზიის საიტზე გადაამოწმე. „სავარაუდო ფასი საქართველოში“ შეფასებაა და არა გარანტია.</p><p>ზოგიერთი ბმული შეიძლება იყოს პარტნიორული.</p><p>© ${new Date().getFullYear()} SaleVibes</p></div></div>`;
