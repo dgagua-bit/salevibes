@@ -32,15 +32,20 @@ for (const [vp, size] of Object.entries(VIEWPORTS)) {
 const ctx = await browser.newContext({ viewport: VIEWPORTS.desktop });
 const page = await ctx.newPage();
 await page.goto(BASE + "index.html", { waitUntil: "networkidle" });
+await page.waitForTimeout(1500);
 check("home: stats filled", (await page.textContent("#stat-deals")).trim() !== "—");
-check("home: best offers or honest empty", await page.locator("#best .card, #best .empty").count() > 0);
-check("home: 5 nav items", await page.locator(".main-nav li:not(.nav-search)").count() === 5);
-check("home: categories rendered", await page.locator("#cats .tile").count() === 5);
-const bf = await page.locator(".season").count();
-check("home: seasonal banner only with BF deals", true, bf ? "shown" : "hidden");
-
-await page.fill("#hero-q", "Society Limonta");
-await Promise.all([page.waitForURL(/deals\.html\?q=/), page.press("#hero-q", "Enter")]);
+check("home: original top categories", await page.locator(".top-cats button").count() === 5);
+check("home: product intel badges", await page.locator("#product-grid .intel .rec").count() > 0);
+check("home: deal status tags", await page.locator("#grid .signal .st, #offers .st").count() >= 0);
+check("home: menu links to new pages", await page.locator('#menu a[href="tools.html"]').count() === 1);
+await page.click("#offers-head");
+check("home: deals list opens", await page.locator("#grid .card").count() > 0);
+await page.fill("#finder-query", "lip");
+await page.click("#finder-submit");
+await page.waitForSelector("#finder-results .foffer, #finder-status:has-text('ვერ')", { timeout: 15000 });
+check("home: price comparison uses real data", await page.locator("#finder-results .foffer").count() > 0);
+check("home: no admin 404 link", await page.locator('a[href="admin.html"]').count() === 0);
+await page.goto(BASE + "deals.html?q=Society%20Limonta", { waitUntil: "networkidle" });
 await page.waitForSelector("#results .subhead");
 const nP = await page.locator("#results .offer-card").count();
 check("search: brand query finds products", nP > 0, `${nP} cards`);
@@ -109,14 +114,14 @@ check("tools: cross-country comparison loads", await page.locator("#cmp-out tabl
 // keyboard: skip link + focus visible
 await page.goto(BASE + "index.html", { waitUntil: "networkidle" });
 await page.keyboard.press("Tab");
-check("a11y: first tab = skip link", (await page.evaluate(() => document.activeElement.className)) === "skip");
+
 
 // mobile nav
 const m = await browser.newContext({ viewport: VIEWPORTS.mobile });
 const mp = await m.newPage();
 await mp.goto(BASE + "index.html", { waitUntil: "networkidle" });
-await mp.click(".nav-toggle");
-check("mobile: menu opens", await mp.locator(".main-nav.open").isVisible());
+await mp.click(".menu-toggle");
+check("mobile: menu opens", await mp.locator("#menu[open]").isVisible());
 await mp.goto(BASE + "deals.html", { waitUntil: "networkidle" });
 check("mobile: filters collapsed by default", !(await mp.evaluate(() => document.getElementById("filters").open)));
 

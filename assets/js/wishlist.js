@@ -4,7 +4,7 @@
  * opens the site (no background/email delivery yet).
  */
 const KEY = "sv-wishlist-v1";
-const LEGACY = "vibes-favs"; // old site: array of deal ids
+const LEGACY = "vibes-favs"; // home page: array of saved deal ids
 
 function blank() { return { items: {}, brands: [], minDiscount: 0 }; }
 
@@ -12,19 +12,24 @@ export function load() {
   let s;
   try { s = JSON.parse(localStorage.getItem(KEY) || "null"); } catch { s = null; }
   if (!s || typeof s !== "object" || !s.items) s = blank();
-  // one-time migration of the old favourites list
+  // The home page (original design) keeps saved promotions in "vibes-favs".
+  // That list is the source of truth for deal items, so both views stay in sync.
   try {
-    const old = JSON.parse(localStorage.getItem(LEGACY) || "null");
-    if (Array.isArray(old) && old.length) {
-      old.forEach(id => { const k = `deal:${id}`; if (!s.items[k]) s.items[k] = { type: "deal", id: String(id), savedAt: new Date().toISOString() }; });
-      localStorage.removeItem(LEGACY);
-      save(s);
+    const legacy = JSON.parse(localStorage.getItem(LEGACY) || "[]");
+    if (Array.isArray(legacy)) {
+      const want = new Set(legacy.map(String));
+      Object.keys(s.items).forEach(k => { if (k.startsWith("deal:") && !want.has(k.slice(5))) delete s.items[k]; });
+      want.forEach(id => { const k = `deal:${id}`; if (!s.items[k]) s.items[k] = { type: "deal", id, savedAt: new Date().toISOString() }; });
     }
   } catch { /* ignore */ }
   return s;
 }
 export function save(s) {
   try { localStorage.setItem(KEY, JSON.stringify(s)); } catch { /* private mode */ }
+  try {
+    const ids = Object.values(s.items).filter(i => i.type === "deal").map(i => (isNaN(Number(i.id)) ? i.id : Number(i.id)));
+    localStorage.setItem(LEGACY, JSON.stringify(ids));
+  } catch { /* private mode */ }
   try { window.dispatchEvent(new CustomEvent("sv:wishlist", { detail: s })); } catch { /* node */ }
 }
 
