@@ -1,12 +1,34 @@
 import { mountChrome, offerCard, dealCard, bindCardActions, skeleton, emptyState, errorState, storeMark, $ } from "../ui.js";
 import { loadAll, dealsForStore, brandIndex } from "../data.js";
 import { WORLDS, FEATURED_BRANDS, SEASONAL } from "../config.js";
-import { esc, countryName, flag } from "../format.js";
+import { esc, countryName, flag, safeUrl, MONTHS } from "../format.js";
 
 mountChrome("home");
 $("#best").innerHTML = skeleton(4);
 $("#deals").innerHTML = skeleton(3);
 $("#cats").innerHTML = skeleton(5, "tile");
+
+/* hero slides */
+const today = new Date();
+const SLIDES = [
+  { image: "photo-1539109136881-3be0616acf4b", kicker: `LIVE · ${today.getDate()} ${MONTHS[today.getMonth()]} ${today.getFullYear()}`, subtitle: "იპოვე რეალური ფასდაკლება,<br>არა უბრალოდ SALE.", link: "deals.html", cta: "აღმოაჩინე შეთავაზებები" },
+  { image: "photo-1483985988355-763728e1935b", kicker: "შენი შემდეგი ფავორიტი / ყველა მაღაზია", subtitle: "ყველა შენი ფავორიტი.<br>ერთ სივრცეში.", link: "categories.html", cta: "აირჩიე შენი სამყარო" },
+  { image: "photo-1511499767150-a48a237f0083", kicker: "ფასი საქართველოში / კალკულატორი", subtitle: "იცოდე, რა დაგიჯდება.<br>მიწოდებით და საბაჟოთი.", link: "tools.html#calc", cta: "გამოთვალე ფასი" }
+];
+let slide = 0;
+function showSlide(n) {
+  slide = (n + SLIDES.length) % SLIDES.length;
+  const d = SLIDES[slide];
+  $("#hero-image").src = `https://images.unsplash.com/${d.image}?auto=format&fit=crop&w=2200&q=85`;
+  $("#hero-kicker").textContent = d.kicker;
+  $("#hero-subtitle").innerHTML = d.subtitle;
+  $("#hero-cta").href = d.link;
+  $("#hero-cta").innerHTML = `${d.cta} <span>↗</span>`;
+  $("#slide-number").textContent = String(slide + 1).padStart(2, "0");
+}
+$("#next-slide").addEventListener("click", () => showSlide(slide + 1));
+$("#prev-slide").addEventListener("click", () => showSlide(slide - 1));
+showSlide(0);
 
 let data;
 bindCardActions(id => data?.byProduct.get(String(id)), id => data?.dealById.get(String(id)));
@@ -24,6 +46,15 @@ function render() {
   $("#stat-offers").textContent = enriched.length || "—";
   $("#stat-deals").textContent = deals ? deals.length : "—";
   $("#stat-stores").textContent = stores ? stores.length : "—";
+  if (deals) $("#intro-count").textContent = `${deals.length} აქტიური შეთავაზება`;
+
+  // top marquee: highest-scoring live promotions
+  const top = (deals || []).slice(0, 12);
+  if (top.length) {
+    const item = d => `<a href="${esc(safeUrl(d.sale_url))}" target="_blank" rel="noopener noreferrer sponsored">${esc(d.store)}${d.discount_percent ? ` −${Math.round(d.discount_percent)}%` : ""}</a>`;
+    const html = top.map(item).join("<i>✳</i>") + "<i>✳</i>";
+    $("#strip").innerHTML = html + `<span aria-hidden="true" class="strip-dup">${html}</span>`;
+  } else $("#strip").closest(".top-strip").hidden = true;
 
   // Best today: only real, discounted product offers with a computable score
   const best = enriched
@@ -80,3 +111,4 @@ function renderSeason() {
   };
   tick(); setInterval(tick, 60000);
 }
+

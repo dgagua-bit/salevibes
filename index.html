@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>SaleVibes — რეალური აქციები და ფასი საქართველოში</title>
 <meta name="description" content="SaleVibes — საერთაშორისო მაღაზიების რეალური ფასდაკლებები, ფასების ისტორია, ჩამოტანის სავარაუდო ღირებულება საქართველოში და BUY / WAIT / SKIP რეკომენდაცია.">
-<meta name="theme-color" content="#FAF8F4">
+<meta name="theme-color" content="#1c100d">
 <meta property="og:title" content="SaleVibes — Shopping Intelligence საქართველოსთვის">
 <meta property="og:description" content="იპოვე საუკეთესო შეთავაზება და გაიგე, რეალურად რამდენად ღირს მისი ყიდვა.">
 <meta property="og:type" content="website">
@@ -16,81 +16,86 @@
 <link rel="stylesheet" href="assets/css/main.css">
 <script type="module" src="assets/js/pages/home.js"></script>
 </head>
-<body>
+<body class="home">
 <a class="skip" href="#main">გადასვლა მთავარ შიგთავსზე</a>
+<div class="top-strip" aria-label="ტოპ შეთავაზებები"><div class="strip-track" id="strip"><span>იტვირთება…</span></div></div>
 <header data-sv-header></header>
 <main id="main">
-  <section class="hero">
-    <div class="wrap hero-grid">
-      <div>
-        <p class="eyebrow">Shopping Intelligence · საქართველოსთვის</p>
-        <h1>იპოვე საუკეთესო შეთავაზება და გაიგე, <em>რეალურად რამდენად ღირს</em> მისი ყიდვა.</h1>
-        <p class="hero-lead">ვამოწმებთ ევროპული და ამერიკული მაღაზიების აქციებს, ვადევნებთ ფასს თვალს და ვითვლით, რა დაგიჯდება ნივთი საქართველოში ჩამოტანით.</p>
-        <form class="hero-search" action="deals.html" role="search">
-          <label class="sr-only" for="hero-q">პროდუქტის ძიება</label>
-          <input id="hero-q" name="q" type="search" placeholder="პროდუქტი, ბრენდი, მოდელი ან SKU" autocomplete="off">
-          <button class="btn btn-primary" type="submit">ძიება</button>
-        </form>
-        <div class="hero-hints" id="hero-hints"><span>სცადე:</span></div>
-        <div class="stats" aria-live="polite">
-          <div><b id="stat-offers">—</b>პროდუქტი ფასის კონტროლით</div>
-          <div><b id="stat-deals">—</b>მოქმედი აქცია</div>
-          <div><b id="stat-stores">—</b>მაღაზია</div>
-        </div>
+  <section class="hero" id="home">
+    <img class="hero-image" id="hero-image" src="https://images.unsplash.com/photo-1539109136881-3be0616acf4b?auto=format&fit=crop&w=2200&q=85" alt="" fetchpriority="high" onerror="this.style.visibility='hidden'">
+    <div class="hero-copy">
+      <p class="hero-kicker" id="hero-kicker">LIVE</p>
+      <h1 class="sr-only">SaleVibes — რეალური აქციები და ფასი საქართველოში</h1>
+      <p class="hero-subtitle" id="hero-subtitle">იპოვე რეალური ფასდაკლება,<br>არა უბრალოდ SALE.</p>
+      <form class="hero-search" action="deals.html" role="search">
+        <label class="sr-only" for="hero-q">პროდუქტის ძიება</label>
+        <input id="hero-q" name="q" type="search" placeholder="პროდუქტი, ბრენდი, მოდელი ან SKU…" autocomplete="off">
+        <button type="submit">ძებნა →</button>
+      </form>
+      <div class="hero-hints" id="hero-hints"></div>
+      <div class="hero-stats" aria-live="polite">
+        <span><b id="stat-offers">—</b>პროდუქტი ფასის კონტროლით</span>
+        <span><b id="stat-deals">—</b>აქტიური შეთავაზება</span>
+        <span><b id="stat-stores">—</b>მაღაზია</span>
       </div>
-      <ol class="flow" aria-label="როგორ გეხმარება SaleVibes">
-        <li><div><b>REAL DEALS</b><span>მხოლოდ მოქმედი, შემოწმების თარიღით</span></div></li>
-        <li><div><b>REAL PRICES</b><span>საწყისი და ახალი ფასი, ფასის ისტორია</span></div></li>
-        <li><div><b>LANDED COST IN GEORGIA</b><span>მიწოდება, საბაჟო, კურსი — ლარში</span></div></li>
-        <li><div><b>SMART BUYING DECISION</b><span>Deal Score და BUY NOW / WAIT / SKIP</span></div></li>
-      </ol>
     </div>
-    <div class="wrap"><div id="season"></div></div>
+    <span class="hero-side" aria-hidden="true">შერჩეული აღმოჩენები · საერთაშორისო მაღაზიები</span>
+    <div class="hero-bottom">
+      <div class="slide-controls"><div class="slide-counter"><span id="slide-number">01</span><small>/ 03</small></div>
+        <div class="arrows"><button type="button" id="prev-slide" aria-label="წინა სლაიდი">←</button><button type="button" id="next-slide" aria-label="შემდეგი სლაიდი">→</button></div></div>
+      <a class="hero-link" id="hero-cta" href="deals.html">აღმოაჩინე შეთავაზებები <span>↗</span></a>
+    </div>
+  </section>
+  <div class="wrap"><div id="season"></div></div>
+
+  <section class="intro-section">
+    <div><span class="section-index">01 / აღმოჩენის ახალი გზა</span><h2>რეალური ფასდაკლება.<br>რეალური ფასი საქართველოში.</h2></div>
+    <div><p>Sale Vibes აგროვებს ევროპული და საერთაშორისო მაღაზიების მიმდინარე აქციებს, ადევნებს თვალს პროდუქტების ფასს, ითვლის რა დაგიჯდება ნივთი საქართველოში ჩამოტანით და თითოეულ შეთავაზებას გამჭვირვალე ქულას ანიჭებს.</p><a class="inline-link" href="deals.html"><span id="intro-count">აქტიური შეთავაზებები</span> — აღმოაჩინე შენი ↗</a></div>
   </section>
 
-  <section class="section" aria-labelledby="best-h">
+<section class="section" aria-labelledby="best-h">
     <div class="wrap">
-      <div class="section-head"><div><p class="eyebrow">დღის საუკეთესო</p><h2 id="best-h">საუკეთესო შეთავაზებები დღეს</h2><p>რეალური ფასდაკლება, მაღალი Deal Score და ჩამოტანის ღირებულება — პროდუქტის დონეზე.</p></div><a class="btn btn-ghost" href="deals.html?type=products&sort=score">ყველა პროდუქტი →</a></div>
+      <div class="section-head"><div><p class="eyebrow">02 / დღის საუკეთესო</p><h2 id="best-h">საუკეთესო შეთავაზებები დღეს</h2><p>რეალური ფასდაკლება, მაღალი Deal Score და ჩამოტანის ღირებულება — პროდუქტის დონეზე.</p></div><a class="btn btn-ghost" href="deals.html?type=products&sort=score">ყველა პროდუქტი →</a></div>
       <div class="grid" id="best"></div>
     </div>
   </section>
 
   <section class="section" aria-labelledby="cat-h">
     <div class="wrap">
-      <div class="section-head"><div><p class="eyebrow">კატეგორიები</p><h2 id="cat-h">პოპულარული კატეგორიები</h2></div><a class="btn btn-ghost" href="categories.html">ყველა კატეგორია →</a></div>
+      <div class="section-head"><div><p class="eyebrow">03 / სამყაროები</p><h2 id="cat-h">პოპულარული კატეგორიები</h2></div><a class="btn btn-ghost" href="categories.html">ყველა კატეგორია →</a></div>
       <div class="tiles" id="cats"></div>
     </div>
   </section>
 
   <section class="section" aria-labelledby="deals-h">
     <div class="wrap">
-      <div class="section-head"><div><p class="eyebrow">აქტიური ფასდაკლებები</p><h2 id="deals-h">მაღაზიების მოქმედი აქციები</h2><p>მაღაზიის საერთო სეილები და პრომოკოდები — ხელით შემოწმებული.</p></div><a class="btn btn-ghost" href="deals.html?type=deals">ყველა აქცია →</a></div>
+      <div class="section-head"><div><p class="eyebrow">04 / აქტიური ფასდაკლებები</p><h2 id="deals-h">მაღაზიების მოქმედი აქციები</h2><p>მაღაზიის საერთო სეილები და პრომოკოდები — ხელით შემოწმებული.</p></div><a class="btn btn-ghost" href="deals.html?type=deals">ყველა აქცია →</a></div>
       <div class="grid deals" id="deals"></div>
     </div>
   </section>
 
   <section class="section" aria-labelledby="brands-h">
     <div class="wrap">
-      <div class="section-head"><div><p class="eyebrow">ბრენდები</p><h2 id="brands-h">პოპულარული ბრენდები</h2></div><a class="btn btn-ghost" href="brands.html">ყველა ბრენდი →</a></div>
+      <div class="section-head"><div><p class="eyebrow">05 / ბრენდები</p><h2 id="brands-h">პოპულარული ბრენდები</h2></div><a class="btn btn-ghost" href="brands.html">ყველა ბრენდი →</a></div>
       <div class="chips" id="brands"></div>
     </div>
   </section>
 
   <section class="section" aria-labelledby="stores-h">
     <div class="wrap">
-      <div class="section-head"><div><p class="eyebrow">საერთაშორისო მაღაზიები</p><h2 id="stores-h">მაღაზიები, სადაც ახლა აქციაა</h2></div><a class="btn btn-ghost" href="stores.html">ყველა მაღაზია →</a></div>
+      <div class="section-head"><div><p class="eyebrow">06 / მაღაზიები</p><h2 id="stores-h">მაღაზიები, სადაც ახლა აქციაა</h2></div><a class="btn btn-ghost" href="stores.html">ყველა მაღაზია →</a></div>
       <div class="tiles store-tiles" id="stores"></div>
     </div>
   </section>
 
-  <section class="section" aria-labelledby="why-h">
-    <div class="wrap">
-      <div class="section-head"><div><p class="eyebrow">რატომ SaleVibes</p><h2 id="why-h">არა კუპონების საიტი — გადაწყვეტილების ინსტრუმენტი</h2></div></div>
-      <div class="why">
-        <article><b>01</b><h3>რეალური ფასდაკლება</h3><p>ფასდაკლებას ვადარებთ პროდუქტის საკუთარ ფასის ისტორიას და ვნიშნავთ საეჭვო „სეილებს“.</p></article>
-        <article><b>02</b><h3>ფასი საქართველოში</h3><p>ნივთი + მიწოდება + საბაჟო ლარში, ყველა დაშვების მკაფიო მითითებით.</p></article>
-        <article><b>03</b><h3>გამჭვირვალე ქულა</h3><p>Deal Score-ის ყოველი ფაქტორი ჩანს. სადაც მონაცემი არ გვაქვს, ასე ვწერთ.</p></article>
-        <article><b>04</b><h3>BUY / WAIT / SKIP</h3><p>რეკომენდაცია ეფუძნება მხოლოდ რეალურ ფასებს, ისტორიას და ხარჯებს.</p></article>
+  <section class="about" aria-labelledby="why-h">
+    <div class="wrap about-grid">
+      <div><p class="eyebrow">07 / როგორ მუშაობს</p><h2 id="why-h">მეტი სტილი,<br>ნაკლები ძებნა.</h2></div>
+      <div class="steps">
+        <div><b>01</b><h3>REAL DEALS</h3><p>მხოლოდ მოქმედი აქციები — ბოლო შემოწმების თარიღით.</p></div>
+        <div><b>02</b><h3>REAL PRICES</h3><p>საწყისი და ახალი ფასი, ფასის ისტორია, საეჭვო „სეილების“ აღმოჩენა.</p></div>
+        <div><b>03</b><h3>LANDED COST</h3><p>ნივთი + მიწოდება + საბაჟო ლარში, ყველა დაშვების მითითებით.</p></div>
+        <div><b>04</b><h3>SMART DECISION</h3><p>Deal Score და BUY NOW / WAIT / SKIP — მხოლოდ რეალურ მონაცემებზე.</p></div>
       </div>
     </div>
   </section>

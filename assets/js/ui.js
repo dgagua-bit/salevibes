@@ -19,7 +19,7 @@ const EXT = 'target="_blank" rel="noopener noreferrer sponsored"';
 export function mountChrome(active) {
   const h = $("[data-sv-header]");
   if (h) {
-    h.className = "site-header";
+    h.className = "site-header" + (active === "home" ? " over" : "");
     h.innerHTML = `<div class="wrap header-row">
       <a class="logo" href="./" aria-label="SaleVibes — მთავარი"><span class="logo-mark" aria-hidden="true">S</span><span>SaleVibes</span></a>
       <nav class="main-nav" id="main-nav" aria-label="მთავარი ნავიგაცია"><ul><li class="nav-search"><form action="deals.html" role="search"><label class="sr-only" for="mq">ძიება</label><input id="mq" name="q" type="search" placeholder="ძიება: პროდუქტი, ბრენდი, SKU…"></form></li>${NAV.map(n => `<li><a href="${n.href}"${n.id === active ? ' aria-current="page"' : ""}>${n.label}</a></li>`).join("")}</ul></nav>
@@ -90,20 +90,37 @@ export function offerCard(e) {
 }
 
 /* ---------- store-level promotion card ---------- */
-export function dealCard(d) {
+const PHOTOS = {
+  fashion: ["photo-1542272604-787c3835535d", "photo-1483985988355-763728e1935b"],
+  luxury: ["photo-1539109136881-3be0616acf4b", "photo-1483985988355-763728e1935b"],
+  shoes: ["photo-1542291026-7eec264c27ff"], accessories: ["photo-1511499767150-a48a237f0083"],
+  watches: ["photo-1511499767150-a48a237f0083"], beauty: ["photo-1516257984-b1b4d707412e"],
+  home: ["photo-1483985988355-763728e1935b"], other: ["photo-1483985988355-763728e1935b", "photo-1539109136881-3be0616acf4b"]
+};
+export const photoFor = (cat, i = 0) => { const l = PHOTOS[String(cat || "").toLowerCase()] || PHOTOS.other; return `https://images.unsplash.com/${l[i % l.length]}?auto=format&fit=crop&w=800&q=75`; };
+
+export function dealCard(d, i = 0) {
   const st = dealStatus(d);
   const url = safeUrl(d.sale_url);
   const disc = d.discount_percent ? Math.round(d.discount_percent) : null;
   return `<article class="card deal-card">
-    <div class="deal-head">${storeMark(d.store)}<div><div class="deal-store">${esc(d.store)}</div><div class="card-meta">${flag(d.country)} ${esc(countryName(d.country))} · ${esc(catLabel(d.category))} · ${esc(hostOf(d.sale_url))}</div></div>
-    ${heartBtn("deal", d.id, d.store, { title: `${d.store}: ${d.title}` })}</div>
-    <div class="deal-disc">${disc ? `−${disc}%<small>${/მდე|up to/i.test(d.title || "") ? "-მდე" : ""}</small>` : "<small>ფასდაკლება მითითებული არ არის</small>"}</div>
-    <h3 class="card-title">${esc(d.title)}</h3>
-    ${d.description ? `<p class="deal-desc">${esc(d.description)}</p>` : ""}
-    ${d.promo_code ? `<button class="code" type="button" data-code="${esc(d.promo_code)}"><span>პრომოკოდი</span><b>${esc(d.promo_code)}</b><i aria-hidden="true">⧉</i></button>` : ""}
-    <div class="card-intel"><button type="button" class="score-pill promo" data-deal-score="${esc(d.id)}" aria-label="აქციის ქულა ${Math.round(d.deal_score || 0)} — განმარტება"><span>აქციის ქულა</span><b>${Math.round(d.deal_score || 0)}</b><i style="--w:${Math.round(d.deal_score || 0)}%"></i></button><span class="rec rec-insufficient" title="მაღაზიის საერთო აქციაა — კონკრეტული პროდუქტის ფასი არ გვაქვს">BUY/WAIT: მონაცემები არასაკმარისია</span></div>
-    <div class="card-foot">${statusBadge(st)}<span class="checked">${d.end_date ? `მთავრდება ${esc(dateKa(d.end_date))} · ` : ""}შემოწმდა ${esc(ago(d.last_checked) || "—")}</span></div>
-    <div class="card-actions"><a class="btn btn-primary" href="${esc(url)}" ${EXT}>აქციის ნახვა ↗</a></div>
+    <a class="card-media" href="${esc(url)}" ${EXT} tabindex="-1" aria-hidden="true">
+      <span class="media-fallback">${esc(String(d.store || "?").charAt(0))}</span>
+      <img src="${photoFor(d.category, i)}" alt="" loading="lazy" decoding="async" width="800" height="1000" onerror="this.remove()">
+      <span class="disc-badge">${disc ? `−${disc}%` : "SALE"}</span>
+      <span class="photo-note">საილუსტრაციო ფოტო</span>
+    </a>
+    ${heartBtn("deal", d.id, d.store, { title: `${d.store}: ${d.title}` })}
+    <div class="card-body">
+      <div class="card-meta"><span>${flag(d.country)} ${esc(countryName(d.country))}</span><span>↗ ${esc(catLabel(d.category))}</span></div>
+      <h3 class="deal-store">${esc(d.store)}</h3>
+      <p class="deal-line">${esc(d.title)}</p>
+      ${d.description ? `<p class="deal-desc">${esc(d.description)}</p>` : ""}
+      ${d.promo_code ? `<button class="code" type="button" data-code="${esc(d.promo_code)}"><span>კოდი</span><b>${esc(d.promo_code)}</b><i aria-hidden="true">⧉</i></button>` : ""}
+      <div class="card-intel"><button type="button" class="score-pill promo" data-deal-score="${esc(d.id)}" aria-label="აქციის ქულა ${Math.round(d.deal_score || 0)} — განმარტება"><span>აქციის ქულა</span><b>${Math.round(d.deal_score || 0)}</b><i style="--w:${Math.round(d.deal_score || 0)}%"></i></button><span class="rec rec-insufficient" title="მაღაზიის საერთო აქციაა — კონკრეტული პროდუქტის ფასი არ გვაქვს">რეკომენდაციისთვის მონაცემები არასაკმარისია</span></div>
+      <div class="card-foot">${statusBadge(st)}<span class="checked">${d.end_date ? `მთავრდება ${esc(dateKa(d.end_date))} · ` : ""}შემოწმდა ${esc(ago(d.last_checked) || "—")}</span></div>
+      <div class="card-actions"><a class="btn btn-primary" href="${esc(url)}" ${EXT}>შეთავაზების ნახვა ↗</a></div>
+    </div>
   </article>`;
 }
 
