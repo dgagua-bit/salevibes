@@ -305,4 +305,5 @@ document.addEventListener("keydown",e=>{if(e.key==="Escape"&&cpKey)closeCatPanel
 /* boot */
 (async()=>{try{await loadData();renderTop();fillFilters();renderDeals();lookCounts();renderWorlds();renderBrandChips();renderStores()}catch(e){console.error(e);$("#results").textContent="მონაცემები ვერ ჩაიტვირთა.";$("#grid").innerHTML=`<div class="empty">შეთავაზებების ჩატვირთვა ვერ მოხერხდა. შეამოწმე ინტერნეტი და განაახლე გვერდი.</div>`}})();
 loadFx().then(loadProducts);
-</script></body></html>
+</script><script type="module" src="assets/js/engage.js"></script>
+</body></html>
