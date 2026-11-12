@@ -35,7 +35,7 @@ await page.goto(BASE + "index.html", { waitUntil: "networkidle" });
 await page.waitForTimeout(1500);
 check("home: stats filled", (await page.textContent("#stat-deals")).trim() !== "—");
 check("home: original top categories", await page.locator(".top-cats button").count() === 5);
-check("home: product intel badges", await page.locator("#product-grid .intel .rec").count() > 0);
+check("home: best offers — 4 picks from different stores", await page.evaluate(() => { const s = [...document.querySelectorAll("#best-grid .bo h3")].map(e => e.textContent); return s.length === 4 && new Set(s).size === 4; }));
 check("home: deal status tags", await page.locator("#grid .signal .st, #offers .st").count() >= 0);
 check("home: menu links to new pages", await page.locator('#menu a[href="tools.html"]').count() === 1);
 await page.click("#offers-head");
