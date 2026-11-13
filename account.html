@@ -17,58 +17,83 @@
 <a class="skip" href="#main">გადასვლა მთავარ შიგთავსზე</a>
 <header data-sv-header></header>
 <main id="main">
-<div class="wrap acct">
-  <div class="page-head"><p class="eyebrow">ჩემი კაბინეტი</p><h1 id="acct-h">შესვლა</h1><p id="acct-sub">შედი ან დარეგისტრირდი: შეინახე პროდუქტები და ბმულები, მიუთითე სამიზნე ფასი და ნახე შეთავაზებები შენი ინტერესების მიხედვით.</p></div>
-  <p class="form-status" id="acct-msg" role="status" aria-live="polite"></p>
+<p class="form-status acct-msg wrap" id="acct-msg" role="status" aria-live="polite"></p>
 
-  <section id="auth-box" class="acct-auth" hidden>
-    <div class="seg" role="tablist" aria-label="შესვლა ან რეგისტრაცია"><button type="button" role="tab" data-tab="in" aria-pressed="true">შესვლა</button><button type="button" role="tab" data-tab="up" aria-pressed="false">რეგისტრაცია</button><button type="button" role="tab" data-tab="reset" aria-pressed="false">დაგავიწყდა პაროლი?</button></div>
-    <form class="panel acct-form" id="f-in" novalidate>
+<!-- signed out -->
+<section id="auth-box" class="acct-gate" hidden>
+  <div class="gate-art" aria-hidden="true"><div class="gate-copy"><p class="gate-k">ჩემი Sale Vibes</p><p class="gate-h">შენი ბრენდები.<br>შენი ფასები.<br>ერთ ადგილას.</p>
+    <ul class="gate-list"><li>შეთავაზებები მხოლოდ შენი ინტერესებით</li><li>შენახული პროდუქტები ყველა მოწყობილობაზე</li><li>ნებისმიერი ბმულის ფასის კონტროლი</li><li>სამიზნე ფასი — გაიგე, როცა დაიკლებს</li></ul></div></div>
+  <div class="gate-form">
+    <h1 id="acct-h">შესვლა</h1>
+    <div class="seg" role="tablist" aria-label="შესვლა ან რეგისტრაცია"><button type="button" role="tab" data-tab="in" aria-pressed="true">შესვლა</button><button type="button" role="tab" data-tab="up" aria-pressed="false">რეგისტრაცია</button></div>
+    <form class="acct-form" id="f-in" novalidate>
       <label class="field">ელფოსტა<input id="in-email" type="email" autocomplete="email" required maxlength="254"></label>
       <label class="field">პაროლი<input id="in-pass" type="password" autocomplete="current-password" required minlength="8"></label>
       <button class="btn btn-dark" type="submit">შესვლა</button>
+      <button type="button" class="link-btn" data-tab="reset">დაგავიწყდა პაროლი?</button>
     </form>
-    <form class="panel acct-form" id="f-up" novalidate hidden>
+    <form class="acct-form" id="f-up" novalidate hidden>
       <label class="field">ელფოსტა<input id="up-email" type="email" autocomplete="email" required maxlength="254"></label>
       <label class="field">პაროლი <span class="hint">(მინიმუმ 8 სიმბოლო)</span><input id="up-pass" type="password" autocomplete="new-password" required minlength="8"></label>
       <label class="check"><input type="checkbox" id="up-consent"> ვეთანხმები, რომ ჩემი ელფოსტა და შენახული პროდუქტები შეინახება მხოლოდ Sale Vibes-ის კაბინეტისა და ფასის შეტყობინებებისთვის. ანგარიშის წაშლა შემიძლია ნებისმიერ დროს.</label>
-      <button class="btn btn-dark" type="submit">რეგისტრაცია</button>
+      <button class="btn btn-dark" type="submit">ანგარიშის შექმნა</button>
     </form>
-    <form class="panel acct-form" id="f-reset" novalidate hidden>
+    <form class="acct-form" id="f-reset" novalidate hidden>
+      <p class="fine">ჩაწერე ელფოსტა — გამოგიგზავნით პაროლის აღდგენის ბმულს.</p>
       <label class="field">ელფოსტა<input id="re-email" type="email" autocomplete="email" required maxlength="254"></label>
       <button class="btn btn-dark" type="submit">აღდგენის ბმულის გაგზავნა</button>
+      <button type="button" class="link-btn" data-tab="in">← შესვლაზე დაბრუნება</button>
     </form>
-    <form class="panel acct-form" id="f-newpass" novalidate hidden>
+    <form class="acct-form" id="f-newpass" novalidate hidden>
       <label class="field">ახალი პაროლი<input id="np-pass" type="password" autocomplete="new-password" required minlength="8"></label>
       <button class="btn btn-dark" type="submit">პაროლის შენახვა</button>
     </form>
+  </div>
+</section>
+
+<!-- signed in -->
+<div id="cab" hidden>
+  <section class="cab-hero">
+    <div class="wrap cab-hero-in">
+      <div><p class="cab-k">ჩემი კაბინეტი</p><h1 class="cab-h" id="cab-hello">გამარჯობა</h1><p class="cab-sub" id="me-email-top"></p></div>
+      <dl class="cab-stats">
+        <div><dt>შენახული</dt><dd id="st-saved">—</dd></div>
+        <div><dt>ფასს ვაკონტროლებთ</dt><dd id="st-track">—</dd></div>
+        <div class="hl"><dt>სამიზნეს მიაღწია</dt><dd id="st-hit">—</dd></div>
+        <div><dt>შენთვის დღეს</dt><dd id="st-fy">—</dd></div>
+      </dl>
+    </div>
+    <nav class="wrap cab-tabs" role="tablist" aria-label="კაბინეტის ნაწილები">
+      <a role="tab" href="#for-you" data-pane="for-you">შენთვის</a><a role="tab" href="#saved" data-pane="saved">შენახული <b id="tab-saved-n"></b></a><a role="tab" href="#add-link" data-pane="add-link">+ ბმული</a><a role="tab" href="#interests" data-pane="interests">ინტერესები</a><a role="tab" href="#settings" data-pane="settings">პარამეტრები</a>
+    </nav>
   </section>
 
-  <div id="cab" hidden>
-    <nav class="chips acct-nav" aria-label="კაბინეტის ნაწილები"><a class="chip" href="#for-you">შენთვის</a><a class="chip" href="#saved">შენახული</a><a class="chip" href="#add-link">ბმულის დამატება</a><a class="chip" href="#interests">ინტერესები</a><a class="chip" href="#settings">პარამეტრები</a></nav>
+  <div class="wrap cab-body">
+    <section class="cab-pane" id="for-you" aria-labelledby="fy-h"><div class="pane-head"><h2 id="fy-h">შენთვის</h2><p>საუკეთესო შეთავაზებები შენი ბრენდების, კატეგორიებისა და მაღაზიების მიხედვით.</p></div><div class="int-strip" id="int-strip"></div><div id="fy"></div></section>
 
-    <section class="section" id="for-you" aria-labelledby="fy-h"><div class="section-head"><div><h2 id="fy-h">შენთვის</h2><p>საუკეთესო შეთავაზებები შენი ბრენდების, კატეგორიებისა და მაღაზიების მიხედვით.</p></div></div><div id="fy"></div></section>
+    <section class="cab-pane" id="saved" aria-labelledby="sv-h" hidden><div class="pane-head"><h2 id="sv-h">შენახული</h2><p id="sv-sub"></p></div>
+      <div class="sv-tools"><div class="seg" role="group" aria-label="ტიპი" id="sv-filter"><button type="button" data-f="" aria-pressed="true">ყველა</button><button type="button" data-f="offer" aria-pressed="false">პროდუქტები</button><button type="button" data-f="link" aria-pressed="false">ბმულები</button><button type="button" data-f="compare" aria-pressed="false">შედარებები</button><button type="button" data-f="deal" aria-pressed="false">აქციები</button></div>
+      <label class="sort"><span>დალაგება</span><select id="sv-sort"><option value="new">ბოლოს შენახული</option><option value="drop">ყველაზე მეტად გაიაფდა</option><option value="target">სამიზნესთან ყველაზე ახლოს</option></select></label></div>
+      <div id="sv"></div></section>
 
-    <section class="section" id="saved" aria-labelledby="sv-h"><div class="section-head"><div><h2 id="sv-h">შენახული</h2><p id="sv-sub">პროდუქტები, აქციები, შედარებები და ბმულები. მიუთითე სამიზნე ფასი — როცა ფასი მას მიაღწევს, მოინიშნება.</p></div></div><div id="sv"></div></section>
-
-    <section class="section" id="add-link" aria-labelledby="al-h"><div class="section-head"><div><h2 id="al-h">ბმულის დამატება</h2><p>ჩასვი ნებისმიერი ონლაინ მაღაზიის პროდუქტის ბმული. თუ მაღაზია ფასს აჩვენებს, ფასს ყოველდღე შევამოწმებთ და ისტორიას შევინახავთ; თუ არა — ბმული სანიშნედ შეინახება.</p></div></div>
-      <form class="panel" id="f-link" novalidate><div class="fields"><label class="field full">პროდუქტის ბმული<input id="ln-url" type="url" inputmode="url" placeholder="https://…" required maxlength="2000"></label><label class="field">სამიზნე ფასი <span class="hint">(არასავალდებულო, მაღაზიის ვალუტაში)</span><input id="ln-target" type="number" min="0" step="0.01" inputmode="decimal"></label></div><p style="margin-top:12px"><button class="btn btn-dark" type="submit">შენახვა და ფასის შემოწმება</button></p><p class="form-status" id="ln-msg" role="status" aria-live="polite"></p></form>
+    <section class="cab-pane" id="add-link" aria-labelledby="al-h" hidden><div class="pane-head"><h2 id="al-h">ბმულის დამატება</h2><p>ჩასვი ნებისმიერი ონლაინ მაღაზიის პროდუქტის ბმული. თუ მაღაზია ფასს აჩვენებს, ყოველდღე შევამოწმებთ და ისტორიას შევინახავთ; თუ არა — ბმული სანიშნედ შეინახება.</p></div>
+      <form class="link-box" id="f-link" novalidate><label class="sr-only" for="ln-url">პროდუქტის ბმული</label><input id="ln-url" type="url" inputmode="url" placeholder="https://www.მაღაზია.com/products/…" required maxlength="2000"><label class="sr-only" for="ln-target">სამიზნე ფასი</label><input id="ln-target" type="number" min="0" step="0.01" inputmode="decimal" placeholder="სამიზნე ფასი"><button class="btn btn-dark" type="submit">შენახვა</button></form>
+      <p class="form-status" id="ln-msg" role="status" aria-live="polite"></p>
+      <ol class="how3"><li><b>ჩასვი ბმული</b><span>პროდუქტის გვერდის მისამართი ბრაუზერიდან</span></li><li><b>ფასს ვკითხულობთ</b><span>სახელს, ფოტოს და ფასს მაღაზიის გვერდიდან</span></li><li><b>ყოველდღე ვამოწმებთ</b><span>და ვინიშნავთ, როცა სამიზნე ფასს მიაღწევს</span></li></ol>
     </section>
 
-    <section class="section" id="interests" aria-labelledby="in-h"><div class="section-head"><div><h2 id="in-h">ჩემი ინტერესები</h2><p>მონიშნე, რა გაინტერესებს — „შენთვის“ ამის მიხედვით აეწყობა.</p></div></div>
-      <div class="panel"><h3 class="acct-h3">კატეგორიები</h3><div class="chips" id="int-cat"></div>
-      <h3 class="acct-h3">ბრენდები</h3><div class="chips" id="int-brand"></div><form class="form-row acct-add" id="f-brand"><input id="br-in" list="br-list" placeholder="დაამატე ბრენდი, მაგ. Speedo" aria-label="ბრენდის დამატება"><datalist id="br-list"></datalist><button class="btn btn-ghost" type="submit">დამატება</button></form>
-      <h3 class="acct-h3">მაღაზიები</h3><div class="chips" id="int-store"></div><form class="form-row acct-add" id="f-store"><input id="st-in" list="st-list" placeholder="დაამატე მაღაზია, მაგ. Zalando" aria-label="მაღაზიის დამატება"><datalist id="st-list"></datalist><button class="btn btn-ghost" type="submit">დამატება</button></form></div>
+    <section class="cab-pane" id="interests" aria-labelledby="in-h" hidden><div class="pane-head"><h2 id="in-h">ჩემი ინტერესები</h2><p>მონიშნე, რა გაინტერესებს — „შენთვის“ ამის მიხედვით აეწყობა.</p></div>
+      <h3 class="acct-h3">კატეგორიები</h3><div class="int-tiles" id="int-cat"></div>
+      <div class="int-cols"><div><h3 class="acct-h3">ბრენდები</h3><form class="form-row acct-add" id="f-brand"><input id="br-in" list="br-list" placeholder="დაამატე ბრენდი, მაგ. Speedo" aria-label="ბრენდის დამატება"><datalist id="br-list"></datalist><button class="btn btn-ghost" type="submit">დამატება</button></form><div class="chips" id="int-brand"></div></div>
+      <div><h3 class="acct-h3">მაღაზიები</h3><form class="form-row acct-add" id="f-store"><input id="st-in" list="st-list" placeholder="დაამატე მაღაზია, მაგ. Zalando" aria-label="მაღაზიის დამატება"><datalist id="st-list"></datalist><button class="btn btn-ghost" type="submit">დამატება</button></form><div class="chips" id="int-store"></div></div></div>
     </section>
 
-    <section class="section" id="settings" aria-labelledby="se-h"><div class="section-head"><div><h2 id="se-h">პარამეტრები</h2></div></div>
-      <div class="panel acct-settings">
-        <p><b id="me-email"></b></p>
-        <label class="check"><input type="checkbox" id="set-alerts"> ელფოსტით შეტყობინება, როცა შენახული პროდუქტის ფასი სამიზნეს მიაღწევს</label>
-        <p class="fine" id="alerts-note"></p>
-        <form class="form-row" id="f-pass"><label class="sr-only" for="ch-pass">ახალი პაროლი</label><input id="ch-pass" type="password" autocomplete="new-password" minlength="8" placeholder="ახალი პაროლი (მინიმუმ 8)"><button class="btn btn-ghost" type="submit">პაროლის შეცვლა</button></form>
-        <p class="acct-actions"><button class="btn btn-ghost" type="button" id="btn-out">გასვლა</button> <button class="btn btn-ghost acct-danger" type="button" id="btn-del">ანგარიშის წაშლა</button></p>
-        <div id="del-confirm" class="notice" hidden><span>ანგარიში და ყველა შენახული მონაცემი სამუდამოდ წაიშლება.</span> <button class="btn btn-dark" type="button" id="btn-del-yes">დიახ, წაშალე</button> <button class="btn btn-ghost" type="button" id="btn-del-no">გაუქმება</button></div>
+    <section class="cab-pane" id="settings" aria-labelledby="se-h" hidden><div class="pane-head"><h2 id="se-h">პარამეტრები</h2></div>
+      <div class="set-grid">
+        <div class="set-card"><h3>ანგარიში</h3><p><b id="me-email"></b></p><form class="form-row" id="f-pass"><label class="sr-only" for="ch-pass">ახალი პაროლი</label><input id="ch-pass" type="password" autocomplete="new-password" minlength="8" placeholder="ახალი პაროლი (მინიმუმ 8)"><button class="btn btn-ghost" type="submit">შეცვლა</button></form><p><button class="btn btn-ghost" type="button" id="btn-out">გასვლა</button></p></div>
+        <div class="set-card"><h3>შეტყობინებები</h3><label class="check"><input type="checkbox" id="set-alerts"> ელფოსტით შეტყობინება, როცა შენახული პროდუქტის ფასი სამიზნეს მიაღწევს</label><p class="fine" id="alerts-note"></p></div>
+        <div class="set-card danger"><h3>ანგარიშის წაშლა</h3><p class="fine">ანგარიში, ინტერესები და ყველა შენახული პროდუქტი სამუდამოდ წაიშლება.</p><p><button class="btn btn-ghost acct-danger" type="button" id="btn-del">ანგარიშის წაშლა</button></p>
+          <div id="del-confirm" class="notice" hidden><span>დარწმუნებული ხარ?</span> <button class="btn btn-dark" type="button" id="btn-del-yes">დიახ, წაშალე</button> <button class="btn btn-ghost" type="button" id="btn-del-no">გაუქმება</button></div></div>
       </div>
     </section>
   </div>
