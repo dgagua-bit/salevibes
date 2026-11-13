@@ -70,7 +70,7 @@ function render(e, points, fxRes) {
   </section>
 
   <section class="panel" aria-labelledby="score-h">
-    <div class="panel-head"><h2 id="score-h">Deal Score — ფაქტორები</h2></div>
+    <div class="panel-head"><h2 id="score-h">შეთავაზების ქულა — ფაქტორები</h2></div>
     ${factorTable(e.scored)}
   </section>`;
 

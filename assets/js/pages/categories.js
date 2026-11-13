@@ -42,7 +42,7 @@ function renderWorld() {
   } else aud.hidden = true;
   $("#world-stores").innerHTML = list.map(s => {
     const ds = dealsForStore(data.deals, s), best = ds.reduce((m, d) => Math.max(m, Number(d.discount_percent) || 0), 0);
-    return `<a class="tile store-tile" href="${esc(safeUrl(ds[0]?.sale_url || s.base_url))}" target="_blank" rel="noopener noreferrer sponsored">${storeMark(s.name)}<span class="grow"><b>${esc(s.name)}</b><small>${flag(s.country)} ${esc(countryName(s.country))} · ${esc(hostOf(s.base_url))}</small></span>${ds.length ? `<span class="tag">${best ? `−${best}%-მდე` : "აქცია"}</span>` : `<span class="tag off">აქცია არ არის</span>`}</a>`;
+    return `<a class="tile store-tile" href="${esc(safeUrl(ds[0]?.sale_url || s.base_url))}" target="_blank" rel="noopener noreferrer sponsored">${storeMark(s.name, s.logo_url)}<span class="grow"><b>${esc(s.name)}</b><small>${flag(s.country)} ${esc(countryName(s.country))} · ${esc(hostOf(s.base_url))}</small></span>${ds.length ? `<span class="tag">${best ? `−${best}%-მდე` : "აქცია"}</span>` : `<span class="tag off">აქცია არ არის</span>`}</a>`;
   }).join("") || emptyState("ამ ფილტრით მაღაზია ვერ მოიძებნა.");
 }
 

@@ -1,6 +1,7 @@
 /** Page-level data loading: fetch once, enrich, expose lookups. */
 import { getDeals, getStores, getOffers, getFx } from "./api.js";
 import { enrichOffer } from "./intel.js";
+import { setStoreLogos } from "./ui.js";
 import { catLabel, countryName } from "./format.js";
 
 export async function loadAll({ deals = true, stores = true, offers = true } = {}) {
@@ -15,6 +16,7 @@ export async function loadAll({ deals = true, stores = true, offers = true } = {
     fxRes, fx: fxRes.fx,
     errors: [d, s, o, f].filter(x => x.status === "rejected").map(x => String(x.reason))
   };
+  setStoreLogos(out.stores);
   out.enriched = (out.offersRaw || []).map(x => enrichOffer(x, out.fx));
   out.byProduct = new Map(out.enriched.map(e => [String(e.offer.product_id), e]));
   out.dealById = new Map((out.deals || []).map(x => [String(x.id), x]));

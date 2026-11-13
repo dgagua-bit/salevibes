@@ -13,9 +13,9 @@ catch (e) { console.error(e); $("#s-list").innerHTML = errorState(); }
 
 /** Where does this store's data come from? Never claims automation that doesn't run. */
 function source(s, ds) {
-  if (s.active && s.last_crawled_at) return { k: "auto", html: `<span class="tag auto" title="სკანერი ბოლოს: ${esc(ago(s.last_crawled_at))}">AUTO</span>` };
-  if (ds.length) return { k: "manual", html: `<span class="tag" title="აქციას რედაქცია ხელით ამოწმებს">MANUAL</span>` };
-  return { k: "pending", html: `<span class="tag off" title="მონაცემთა ინტეგრაცია ჯერ არ არის">PENDING</span>` };
+  if (s.active && s.last_crawled_at) return { k: "auto", html: `<span class="tag auto" title="სკანერი ბოლოს: ${esc(ago(s.last_crawled_at))}">ავტომატური</span>` };
+  if (ds.length) return { k: "manual", html: `<span class="tag" title="აქციას რედაქცია ხელით ამოწმებს">ხელით</span>` };
+  return { k: "pending", html: `<span class="tag off" title="მონაცემთა ინტეგრაცია ჯერ არ არის">მოლოდინში</span>` };
 }
 
 function render() {
@@ -27,7 +27,7 @@ function render() {
   $("#s-count").textContent = `${list.length} მაღაზია`;
   $("#s-list").innerHTML = list.slice(0, LIMIT).map(({ s, ds, src }) => {
     const best = ds.reduce((m, d) => Math.max(m, Number(d.discount_percent) || 0), 0);
-    return `<a class="tile store-tile" href="${esc(safeUrl(ds[0]?.sale_url || s.base_url))}" target="_blank" rel="noopener noreferrer sponsored">${storeMark(s.name)}<span class="grow"><b>${esc(s.name)}</b><small>${flag(s.country)} ${esc(countryName(s.country))} · ${esc(catLabel(s.category))} · ${esc(hostOf(s.base_url))}</small></span>${src.html}${ds.length ? `<span class="tag">${best ? `−${best}%` : "აქცია"}</span>` : ""}</a>`;
+    return `<a class="tile store-tile" href="${esc(safeUrl(ds[0]?.sale_url || s.base_url))}" target="_blank" rel="noopener noreferrer sponsored">${storeMark(s.name, s.logo_url)}<span class="grow"><b>${esc(s.name)}</b><small>${flag(s.country)} ${esc(countryName(s.country))} · ${esc(catLabel(s.category))} · ${esc(hostOf(s.base_url))}</small></span>${src.html}${ds.length ? `<span class="tag">${best ? `−${best}%` : "აქცია"}</span>` : ""}</a>`;
   }).join("") || emptyState("მაღაზია ვერ მოიძებნა.");
   const more = $("#s-more");
   more.hidden = list.length <= LIMIT;

@@ -161,7 +161,7 @@ export function recommend(scoreResult, history) {
   return { action: "WAIT", reasons };
 }
 
-export const ACTION_LABEL = { BUY_NOW: "BUY NOW", WAIT: "WAIT", SKIP: "SKIP", INSUFFICIENT: "მონაცემები არასაკმარისია" };
+export const ACTION_LABEL = { BUY_NOW: "იყიდე ახლა", WAIT: "მოიცადე", SKIP: "გამოტოვე", INSUFFICIENT: "მონაცემები არასაკმარისია" };
 export const ACTION_HINT = { BUY_NOW: "კარგი შესყიდვის შესაძლებლობა", WAIT: "სჯობს დაელოდო უკეთეს ფასს ან ინფორმაციას", SKIP: "შეთავაზება არ არის ხელსაყრელი", INSUFFICIENT: "შეფასებისთვის მონაცემები არასაკმარისია" };
-export const STATUS_LABEL = { ACTIVE: "ACTIVE", EXPIRED: "EXPIRED", UNVERIFIED: "UNVERIFIED", OUT_OF_STOCK: "OUT OF STOCK" };
+export const STATUS_LABEL = { ACTIVE: "აქტიური", EXPIRED: "ვადაგასული", UNVERIFIED: "გადასამოწმებელი", OUT_OF_STOCK: "არ არის მარაგში" };
 export const STATUS_HINT = { ACTIVE: "მოქმედებს — ახლახან შემოწმდა", EXPIRED: "ვადაგასულია", UNVERIFIED: "გადასამოწმებელია — დიდი ხანია არ შეგვიმოწმებია", OUT_OF_STOCK: "მარაგში არ არის" };

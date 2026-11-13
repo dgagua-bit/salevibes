@@ -481,3 +481,10 @@ select:hover, input:hover { border-color: var(--ink); }
 .logo-img { height: 74px; width: auto; display: block; }
 .site-footer .logo-img { height: 88px; }
 @media (max-width: 600px) { .logo-img { height: 54px; } .site-footer .logo-img { height: 66px; } }
+
+/* store logos + promo photos */
+.store-mark.has-logo { background: #fff; padding: 2px; box-shadow: 0 0 0 1px var(--line); overflow: hidden; }
+.store-mark.has-logo img { width: 100%; height: 100%; object-fit: contain; }
+.with-logo { display: flex; align-items: center; gap: 10px; }
+.with-logo .store-mark { width: 32px; height: 32px; }
+.media-fallback .fallback-logo { width: 34%; max-width: 120px; aspect-ratio: 1; object-fit: contain; background: #fff; border-radius: 14px; padding: 12px; box-shadow: 0 2px 12px rgba(0,0,0,.1); }

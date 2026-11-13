@@ -37,9 +37,9 @@ function select(name) {
   box.innerHTML = `<div class="section-head"><div><h2>${esc(BRAND)}</h2><p>${stores.length} მაღაზია · ${products.length} პროდუქტი ფასის კონტროლით</p></div><button type="button" class="btn btn-ghost" id="b-clear">გასუფთავება</button></div>
     ${stores.length ? `<p class="fine">ბრენდისა და მაღაზიის კავშირი მიახლოებითია — მოდელი, ფასი და მარაგი მაღაზიის საიტზე გადაამოწმე.</p><div class="tiles store-tiles">${stores.map(s => {
       const ds = dealsForStore(data.deals, s), best = ds.reduce((m, d) => Math.max(m, Number(d.discount_percent) || 0), 0);
-      return `<a class="tile store-tile" href="${esc(safeUrl(ds[0]?.sale_url || s.base_url))}" target="_blank" rel="noopener noreferrer sponsored">${storeMark(s.name)}<span class="grow"><b>${esc(s.name)}</b><small>${flag(s.country)} ${esc(countryName(s.country))} · ${esc(hostOf(s.base_url))}</small></span>${ds.length ? `<span class="tag">${best ? `−${best}%-მდე` : "აქცია"}</span>` : `<span class="tag off">აქცია არ არის</span>`}</a>`;
+      return `<a class="tile store-tile" href="${esc(safeUrl(ds[0]?.sale_url || s.base_url))}" target="_blank" rel="noopener noreferrer sponsored">${storeMark(s.name, s.logo_url)}<span class="grow"><b>${esc(s.name)}</b><small>${flag(s.country)} ${esc(countryName(s.country))} · ${esc(hostOf(s.base_url))}</small></span>${ds.length ? `<span class="tag">${best ? `−${best}%-მდე` : "აქცია"}</span>` : `<span class="tag off">აქცია არ არის</span>`}</a>`;
     }).join("")}</div>` : emptyState("ამ ბრენდს ჯერ არცერთ მაღაზიასთან არ ვაკავშირებთ.")}
-    ${products.length ? `<div class="subhead"><h2>პროდუქტები</h2><p>ფასი, Deal Score, სავარაუდო ფასი საქართველოში</p></div><div class="grid">${products.slice(0, 12).map(offerCard).join("")}</div>${products.length > 12 ? `<div class="more"><a class="btn btn-ghost" href="deals.html?type=products&brand=${encodeURIComponent(BRAND)}">ყველა ${products.length} პროდუქტი →</a></div>` : ""}` : ""}`;
+    ${products.length ? `<div class="subhead"><h2>პროდუქტები</h2><p>ფასი, შეთავაზების ქულა, სავარაუდო ფასი საქართველოში</p></div><div class="grid">${products.slice(0, 12).map(offerCard).join("")}</div>${products.length > 12 ? `<div class="more"><a class="btn btn-ghost" href="deals.html?type=products&brand=${encodeURIComponent(BRAND)}">ყველა ${products.length} პროდუქტი →</a></div>` : ""}` : ""}`;
   box.hidden = false;
 }
 

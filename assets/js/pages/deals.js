@@ -118,7 +118,7 @@ function render() {
 
   let html = "";
   if (showP) {
-    html += `<div class="subhead"><h2>პროდუქტები</h2><p>${P.length} პროდუქტი · ფასი, ისტორია, Deal Score</p></div>`;
+    html += `<div class="subhead"><h2>პროდუქტები</h2><p>${P.length} პროდუქტი · ფასი, ისტორია, ქულა</p></div>`;
     html += P.length ? `<div class="grid">${P.slice(0, S.limitP).map(offerCard).join("")}</div>${P.length > S.limitP ? `<div class="more"><button class="btn btn-ghost" id="more-p" type="button">მეტის ნახვა (+${P.length - S.limitP})</button></div>` : ""}`
       : data.offersRaw === null ? errorState("პროდუქტები ვერ ჩაიტვირთა.") : emptyState(S.tag ? "ეს ფილტრი მხოლოდ მაღაზიის აქციებს ეხება." : "ამ პირობებით პროდუქტი ვერ მოიძებნა.");
   }
@@ -130,7 +130,7 @@ function render() {
   $("#results").innerHTML = html;
   $("#live").textContent = `${P.length} პროდუქტი, ${D.length} აქცია`;
 
-  const labels = { q: `„${S.q}“`, cat: catLabel(S.cat), store: S.store, country: countryName(S.country), brand: S.brand, min: `≥ ${S.min}`, max: `≤ ${S.max}`, disc: `${S.disc}%+`, score: `Score ${S.score}+`, tag: S.tag, onlyDisc: "ფასდაკლებით", saved: "რჩეულები" };
+  const labels = { q: `„${S.q}“`, cat: catLabel(S.cat), store: S.store, country: countryName(S.country), brand: S.brand, min: `≥ ${S.min}`, max: `≤ ${S.max}`, disc: `${S.disc}%+`, score: `ქულა ${S.score}+`, tag: S.tag, onlyDisc: "ფასდაკლებით", saved: "რჩეულები" };
   const active = Object.keys(labels).filter(k => S[k] && S[k] !== "0");
   $("#chips").innerHTML = active.map(k => `<button type="button" data-clear="${k}" aria-label="ფილტრის მოხსნა: ${esc(labels[k])}">${esc(labels[k])} ×</button>`).join("");
   $("#f-count").textContent = active.length ? `(${active.length})` : "";

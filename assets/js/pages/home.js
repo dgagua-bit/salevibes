@@ -87,7 +87,7 @@ function render() {
     .sort((a, b) => Math.max(...b.ds.map(d => d.discount_percent || 0)) - Math.max(...a.ds.map(d => d.discount_percent || 0))).slice(0, 8);
   $("#stores").innerHTML = withDeal.map(({ s, ds }) => {
     const best = Math.max(...ds.map(d => Number(d.discount_percent) || 0));
-    return `<a class="tile store-tile" href="stores.html?s=${encodeURIComponent(s.slug)}">${storeMark(s.name)}<span class="grow"><b>${esc(s.name)}</b><small>${flag(s.country)} ${esc(countryName(s.country))}</small></span><span class="tag">${best ? `−${best}%-მდე` : "აქცია"}</span></a>`;
+    return `<a class="tile store-tile" href="stores.html?s=${encodeURIComponent(s.slug)}">${storeMark(s.name, s.logo_url)}<span class="grow"><b>${esc(s.name)}</b><small>${flag(s.country)} ${esc(countryName(s.country))}</small></span><span class="tag">${best ? `−${best}%-მდე` : "აქცია"}</span></a>`;
   }).join("") || emptyState("მაღაზიების სია ვერ ჩაიტვირთა.");
 
   // Search hints from real data (top brands + a category)

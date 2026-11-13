@@ -69,7 +69,7 @@ await page.click("#f-reset");
 const pill = page.locator("#results .offer-card .score-pill").first();
 if (await pill.count()) { await pill.click(); check("score dialog opens with factor table", await page.locator("dialog[open] .factor-table").count() === 1); await page.keyboard.press("Escape"); }
 const promo = page.locator("#results [data-deal-score]").first();
-if (await promo.count()) { await promo.click(); check("promo score dialog explains limits", (await page.textContent("dialog[open]")).includes("BUY / WAIT / SKIP")); await page.keyboard.press("Escape"); }
+if (await promo.count()) { await promo.click(); check("promo score dialog explains limits", (await page.textContent("dialog[open]")).includes("გამოტოვე")); await page.keyboard.press("Escape"); }
 
 // wishlist
 const heart = page.locator("#results .offer-card .heart").first();

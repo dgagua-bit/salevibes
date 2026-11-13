@@ -7,6 +7,7 @@ import { esc, safeUrl, money, gelText, dateKa, countryName, flag, catLabel } fro
 mountChrome("tools");
 let FXR = { fx: {}, date: null };
 const params = new URLSearchParams(location.search);
+const ST_KA = { VERIFIED: "გადამოწმებული", REPORTED: "წყაროდან", PENDING: "მოლოდინში", UNVERIFIED: "გადასამოწმებელი" };
 const ORIGINS = ["US", "IT", "DE", "GB", "ES", "FR", "GR", "PL", "NL"];
 
 // --- calculator controls
@@ -43,12 +44,12 @@ function calc() {
 // --- carriers table
 $("#car-table").innerHTML = `<thead><tr><th>გადამზიდავი</th><th>მიმართულება</th><th class="num">ტარიფი</th><th>სტატუსი</th><th>წყარო / თარიღი</th></tr></thead><tbody>${CARRIERS.map(c => {
   const rates = Object.entries(c.rates);
-  if (!rates.length) return `<tr><td><b>${esc(c.name)}</b></td><td>—</td><td class="num">—</td><td><span class="status status-unverified">PENDING</span></td><td class="muted">ოფიციალური ტარიფი ჯერ არ გადაგვიმოწმებია</td></tr>`;
-  return rates.map(([o, r]) => `<tr><td><b>${esc(c.name)}</b></td><td>${flag(o)} ${esc(COUNTRIES[o] || o)} → 🇬🇪 · ${esc(r.method)}</td><td class="num">$${r.usdPerKg}/კგ</td><td><span class="status ${r.status === "VERIFIED" ? "status-active" : "status-unverified"}">${r.status}</span></td><td><a class="link" href="${esc(safeUrl(r.source))}" target="_blank" rel="noopener noreferrer">წყარო ↗</a> · ${esc(dateKa(r.effective))}-დან<br><small class="muted">${esc(r.note || "")}</small></td></tr>`).join("");
+  if (!rates.length) return `<tr><td><b>${esc(c.name)}</b></td><td>—</td><td class="num">—</td><td><span class="status status-unverified">მოლოდინში</span></td><td class="muted">ოფიციალური ტარიფი ჯერ არ გადაგვიმოწმებია</td></tr>`;
+  return rates.map(([o, r]) => `<tr><td><b>${esc(c.name)}</b></td><td>${flag(o)} ${esc(COUNTRIES[o] || o)} → 🇬🇪 · ${esc(r.method)}</td><td class="num">$${r.usdPerKg}/კგ</td><td><span class="status ${r.status === "VERIFIED" ? "status-active" : "status-unverified"}">${ST_KA[r.status] || r.status}</span></td><td><a class="link" href="${esc(safeUrl(r.source))}" target="_blank" rel="noopener noreferrer">წყარო ↗</a> · ${esc(dateKa(r.effective))}-დან<br><small class="muted">${esc(r.note || "")}</small></td></tr>`).join("");
 }).join("")}</tbody>`;
 
 // --- customs box
-$("#customs-box").innerHTML = `<p><span class="status ${CUSTOMS.status === "VERIFIED" ? "status-active" : "status-unverified"}">${CUSTOMS.status}</span> ${CUSTOMS.checkedOn ? `გადამოწმდა ${esc(dateKa(CUSTOMS.checkedOn))}` : "წესები გადმოტანილია საიტის წინა ვერსიიდან და ოფიციალურ წყაროსთან ჯერ არ შეგვიდარებია."} <a class="link" href="${esc(CUSTOMS.source)}" target="_blank" rel="noopener noreferrer">rs.ge ↗</a></p>
+$("#customs-box").innerHTML = `<p><span class="status ${CUSTOMS.status === "VERIFIED" ? "status-active" : "status-unverified"}">${ST_KA[CUSTOMS.status] || CUSTOMS.status}</span> ${CUSTOMS.checkedOn ? `გადამოწმდა ${esc(dateKa(CUSTOMS.checkedOn))}` : "წესები გადმოტანილია საიტის წინა ვერსიიდან და ოფიციალურ წყაროსთან ჯერ არ შეგვიდარებია."} <a class="link" href="${esc(CUSTOMS.source)}" target="_blank" rel="noopener noreferrer">rs.ge ↗</a></p>
   <ul><li>პირადი, არაკომერციული ამანათი <b>${CUSTOMS.dutyFreeLimitGel} ₾-მდე</b> და <b>${CUSTOMS.dutyFreeLimitKg} კგ-მდე</b> — გადასახადისგან თავისუფალია.</li>
   <li>განბაჟდება, თუ ღირებულება ${CUSTOMS.dutyFreeLimitGel} ₾-ს ან წონა ${CUSTOMS.dutyFreeLimitKg} კგ-ს აღემატება, ამანათში ${CUSTOMS.sameItemsLimit}+ ერთგვაროვანი ნივთია ან საქონელი კომერციულია.</li>
   <li>განბაჟებისას: დღგ ${CUSTOMS.vatRate * 100}% (ნივთი + მიწოდება) და მოსაკრებელი — ${CUSTOMS.fees.map(f => `${f.fee} ₾${Number.isFinite(f.upTo) ? ` (${f.upTo.toLocaleString("en-US")} ₾-მდე)` : " (ზემოთ)"}`).join(", ")}.</li>

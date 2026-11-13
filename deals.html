@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>აქციები და პროდუქტები — SaleVibes</title>
-<meta name="description" content="ერთიანი ძიება: პროდუქტები ფასის ისტორიით და მაღაზიების მოქმედი აქციები. ფილტრები, დალაგება, Deal Score და სავარაუდო ფასი საქართველოში.">
+<meta name="description" content="ერთიანი ძიება: პროდუქტები ფასის ისტორიით და მაღაზიების მოქმედი აქციები. ფილტრები, დალაგება, შეთავაზების ქულა და სავარაუდო ფასი საქართველოში.">
 <meta name="theme-color" content="#f0ede7">
 
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -32,7 +32,7 @@
       <div class="fgroup" data-only="products"><label>ბრენდი<select id="f-brand"><option value="">ყველა</option></select></label></div>
       <div class="fgroup" data-only="products"><span class="field">ფასი (მაღაზიის ვალუტაში)</span><div class="range"><label><span class="sr-only">მინიმუმი</span><input id="f-min" type="number" min="0" inputmode="decimal" placeholder="დან"></label><label><span class="sr-only">მაქსიმუმი</span><input id="f-max" type="number" min="0" inputmode="decimal" placeholder="მდე"></label></div></div>
       <div class="fgroup"><label>მინ. ფასდაკლება<select id="f-disc"><option value="0">ნებისმიერი</option><option value="10">10%+</option><option value="20">20%+</option><option value="30">30%+</option><option value="50">50%+</option></select></label></div>
-      <div class="fgroup" data-only="products"><label>მინ. Deal Score<select id="f-score"><option value="0">ნებისმიერი</option><option value="40">40+</option><option value="60">60+</option><option value="70">70+</option></select></label>
+      <div class="fgroup" data-only="products"><label>მინ. ქულა<select id="f-score"><option value="0">ნებისმიერი</option><option value="40">40+</option><option value="60">60+</option><option value="70">70+</option></select></label>
         <label class="check"><input type="checkbox" id="f-only-disc"> მხოლოდ ფასდაკლებით</label></div>
       <div class="fgroup"><label class="check"><input type="checkbox" id="f-saved"> მხოლოდ რჩეულები</label>
         <p class="fine">ზომისა და ფერის ფილტრი დაემატება, როცა მაღაზიების მონაცემებში ეს ველები გამოჩნდება. ახლა საჯაროდ მხოლოდ მარაგში არსებული შეთავაზებები ჩანს.</p>
@@ -41,7 +41,7 @@
     <div>
       <div class="results-bar">
         <div class="seg" role="group" aria-label="შედეგის ტიპი"><button type="button" data-type="all" aria-pressed="true">ყველა</button><button type="button" data-type="products" aria-pressed="false">პროდუქტები</button><button type="button" data-type="deals" aria-pressed="false">მაღაზიის აქციები</button></div>
-        <label class="sort"><span>დალაგება</span><select id="sort"><option value="score">საუკეთესო Deal Score</option><option value="discount">ყველაზე დიდი ფასდაკლება</option><option value="price">ყველაზე დაბალი ფასი</option><option value="landed">ყველაზე იაფი საქართველოში</option><option value="new">უახლესი</option></select></label>
+        <label class="sort"><span>დალაგება</span><select id="sort"><option value="score">საუკეთესო ქულა</option><option value="discount">ყველაზე დიდი ფასდაკლება</option><option value="price">ყველაზე დაბალი ფასი</option><option value="landed">ყველაზე იაფი საქართველოში</option><option value="new">უახლესი</option></select></label>
       </div>
       <div class="active-filters" id="chips"></div>
       <p class="sr-only" id="live" role="status" aria-live="polite"></p>

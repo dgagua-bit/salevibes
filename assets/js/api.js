@@ -36,10 +36,10 @@ export async function sb(path, { cache = true, timeout = 15000 } = {}) {
   } finally { clearTimeout(timer); }
 }
 
-const DEAL_COLS = "id,created_at,store,store_slug,country,category,title,description,tags,discount_percent,promo_code,deal_score,sale_url,start_date,end_date,last_checked,status";
-const STORE_COLS = "id,name,slug,country,currency,base_url,category,active,last_crawled_at,worlds,audience,brands,sort_order";
+const DEAL_COLS = "id,created_at,store,store_slug,country,category,title,description,tags,discount_percent,promo_code,deal_score,sale_url,start_date,end_date,last_checked,status,image_url";
+const STORE_COLS = "id,name,slug,country,currency,base_url,category,active,last_crawled_at,worlds,audience,brands,sort_order,logo_url";
 const OFFER_COLS = "id,product_id,current_price,original_price,currency,discount_pct,deal_score,price_signal,in_stock,status,first_seen_at,last_seen_at,score_breakdown," +
-  "products(id,title,brand,sku,category,product_url,image_url,updated_at,stores(name,slug,country,currency,base_url))";
+  "products(id,title,brand,sku,category,product_url,image_url,updated_at,stores(name,slug,country,currency,base_url,logo_url))";
 
 /** Active store-level promotions (curated). Expired-by-date rows are dropped client-side too. */
 export async function getDeals() {

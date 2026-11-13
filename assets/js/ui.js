@@ -50,14 +50,20 @@ export function mountChrome(active) {
 export const statusBadge = s => `<span class="status status-${s.toLowerCase()}" title="${esc(STATUS_HINT[s])}">${esc(STATUS_LABEL[s])}</span>`;
 export const recBadge = r => `<span class="rec rec-${r.action.toLowerCase()}" title="${esc(ACTION_HINT[r.action])}">${esc(ACTION_LABEL[r.action])}</span>`;
 export function scorePill(score, attrs = "") {
-  if (score === null || score === undefined) return `<button type="button" class="score-pill na" ${attrs}><span>Deal Score</span><b>—</b></button>`;
-  return `<button type="button" class="score-pill" ${attrs} aria-label="Deal Score ${score} — ნახე რატომ"><span>Deal Score</span><b>${score}</b><i style="--w:${score}%"></i></button>`;
+  if (score === null || score === undefined) return `<button type="button" class="score-pill na" ${attrs}><span>შეთავაზების ქულა</span><b>—</b></button>`;
+  return `<button type="button" class="score-pill" ${attrs} aria-label="შეთავაზების ქულა ${score} — ნახე რატომ"><span>შეთავაზების ქულა</span><b>${score}</b><i style="--w:${score}%"></i></button>`;
 }
 export function heartBtn(type, id, label, snapshot) {
   const on = wl.has(type, id);
   return `<button type="button" class="heart" data-heart="${esc(type)}:${esc(id)}" data-snap="${esc(JSON.stringify(snapshot || {}))}" aria-pressed="${on}" aria-label="${esc(label)} — რჩეულებში შენახვა">${on ? "♥" : "♡"}</button>`;
 }
-export const storeMark = (name) => `<span class="store-mark" aria-hidden="true">${esc(String(name || "?").trim().charAt(0).toUpperCase())}</span>`;
+export const storeMark = (name, logo) => logo
+  ? `<span class="store-mark has-logo" aria-hidden="true"><img src="${esc(safeUrl(logo))}" alt="" loading="lazy" onerror="this.remove()"></span>`
+  : `<span class="store-mark" aria-hidden="true">${esc(String(name || "?").trim().charAt(0).toUpperCase())}</span>`;
+let STORE_LOGOS = new Map();
+/** Pages call this once stores are loaded so deal cards can show store logos. */
+export function setStoreLogos(stores) { STORE_LOGOS = new Map((stores || []).filter(s => s.logo_url).flatMap(s => [[s.slug, s.logo_url], [s.name, s.logo_url]])); }
+const logoForDeal = d => STORE_LOGOS.get(d.store_slug) || STORE_LOGOS.get(d.store) || null;
 
 /* ---------- product offer card ---------- */
 export function offerCard(e) {
@@ -75,7 +81,7 @@ export function offerCard(e) {
     </a>
     ${heartBtn("offer", o.product_id, p.title, { title: p.title, priceAtSave: o.current_price, currency: cur })}
     <div class="card-body">
-      <div class="card-meta">${storeMark(st.name)}<span>${esc(st.name || "")}</span><span class="dot">·</span><span>${flag(st.country)} ${esc(countryName(st.country))}</span></div>
+      <div class="card-meta">${storeMark(st.name, st.logo_url)}<span>${esc(st.name || "")}</span><span class="dot">·</span><span>${flag(st.country)} ${esc(countryName(st.country))}</span></div>
       ${p.brand ? `<div class="brand-line">${esc(p.brand)}</div>` : ""}
       <h3 class="card-title"><a href="${href}">${esc(p.title || "")}</a></h3>
       <dl class="prices">
@@ -103,17 +109,17 @@ export function dealCard(d, i = 0) {
   const st = dealStatus(d);
   const url = safeUrl(d.sale_url);
   const disc = d.discount_percent ? Math.round(d.discount_percent) : null;
+  const logo = logoForDeal(d);
   return `<article class="card deal-card">
     <a class="card-media" href="${esc(url)}" ${EXT} tabindex="-1" aria-hidden="true">
-      <span class="media-fallback">${esc(String(d.store || "?").charAt(0))}</span>
-      <img src="${photoFor(d.category, i)}" alt="" loading="lazy" decoding="async" width="800" height="1000" onerror="this.remove()">
+      <span class="media-fallback">${logo ? `<img class="fallback-logo" src="${esc(safeUrl(logo))}" alt="" loading="lazy" onerror="this.remove()">` : esc(String(d.store || "?").charAt(0))}</span>
+      ${d.image_url ? `<img src="${esc(safeUrl(d.image_url))}" alt="${esc(d.store)} — აქციის ფოტო" loading="lazy" decoding="async" onerror="this.remove()">` : ""}
       <span class="disc-badge">${disc ? `−${disc}%` : "SALE"}</span>
-      <span class="photo-note">საილუსტრაციო ფოტო</span>
     </a>
     ${heartBtn("deal", d.id, d.store, { title: `${d.store}: ${d.title}` })}
     <div class="card-body">
       <div class="card-meta"><span>${flag(d.country)} ${esc(countryName(d.country))}</span><span>↗ ${esc(catLabel(d.category))}</span></div>
-      <h3 class="deal-store">${esc(d.store)}</h3>
+      <h3 class="deal-store with-logo">${logo ? storeMark(d.store, logo) : ""}${esc(d.store)}</h3>
       <p class="deal-line">${esc(d.title)}</p>
       ${d.description ? `<p class="deal-desc">${esc(d.description)}</p>` : ""}
       ${d.promo_code ? `<button class="code" type="button" data-code="${esc(d.promo_code)}"><span>კოდი</span><b>${esc(d.promo_code)}</b><i aria-hidden="true">⧉</i></button>` : ""}
@@ -142,12 +148,12 @@ export function openDialog(title, html) {
 
 export function factorTable(scored) {
   const rows = scored.factors.map(f => `<tr class="${f.available ? "" : "na"}"><th scope="row">${esc(f.label)}<small>${esc(f.note || "")}</small></th><td>${f.available ? `${Math.round(f.points * 10) / 10} / ${f.max}` : "—"}</td></tr>`).join("");
-  return `<table class="factor-table"><caption class="sr-only">Deal Score ფაქტორები</caption><tbody>${rows}
+  return `<table class="factor-table"><caption class="sr-only">ქულის ფაქტორები</caption><tbody>${rows}
     ${scored.suspicious ? `<tr class="neg"><th scope="row">საეჭვო ფასდაკლება<small>ფასი ცოტა ხნის წინ მნიშვნელოვნად დაბალი იყო</small></th><td>−25</td></tr>` : ""}</tbody></table>
     <p class="fine">ქულა = მიღებული ქულების წილი იმ ფაქტორებში, რომლებზეც მონაცემი გვაქვს (დაფარვა ${Math.round(scored.coverage * 100)}%). „—“ ნიშნავს, რომ მონაცემი ჯერ არ არსებობს და ქულაში არ ითვლება. თუ დაფარვა 60%-ზე ნაკლებია, ქულას არ ვაჩვენებთ.</p>`;
 }
 export function scoreDialog(e) {
-  openDialog(e.scored.score === null ? "Deal Score — მონაცემები არასაკმარისია" : `Deal Score ${e.scored.score}/100`,
+  openDialog(e.scored.score === null ? "შეთავაზების ქულა — მონაცემები არასაკმარისია" : `შეთავაზების ქულა ${e.scored.score}/100`,
     `<p class="dlg-sub">${esc(e.product.title || "")}</p><div class="rec-box">${recBadge(e.rec)}<ul>${e.rec.reasons.map(r => `<li>${esc(r)}</li>`).join("")}</ul></div>${factorTable(e.scored)}<p><a class="btn btn-ghost" href="product.html?id=${encodeURIComponent(e.offer.product_id)}">სრული ანალიზი და ფასის ისტორია →</a></p>`);
 }
 export function dealScoreDialog(d) {
@@ -161,7 +167,7 @@ export function dealScoreDialog(d) {
   if (a !== sum) rows.push(["რედაქციის კორექტირება", a - sum]);
   openDialog(`${d.store} — აქციის ქულა ${a}/100`, `<p class="dlg-sub">${esc(d.title)}</p>
     <table class="factor-table"><tbody>${rows.map(([l, p]) => `<tr><th scope="row">${esc(l)}</th><td>${p > 0 ? "+" : ""}${p}</td></tr>`).join("")}<tr class="sum"><th scope="row">სულ</th><td>${a}</td></tr></tbody></table>
-    <p class="fine">ეს არის მაღაზიის <b>საერთო აქციის</b> ქულა და ეყრდნობა მხოლოდ ფასდაკლების სიდიდეს და პრომოკოდს. კონკრეტული ნივთის ფასი, ისტორია და ჩამოტანის ღირებულება აქ არ ვიცით, ამიტომ BUY / WAIT / SKIP რეკომენდაციას არ ვაძლევთ.</p>`);
+    <p class="fine">ეს არის მაღაზიის <b>საერთო აქციის</b> ქულა და ეყრდნობა მხოლოდ ფასდაკლების სიდიდეს და პრომოკოდს. კონკრეტული ნივთის ფასი, ისტორია და ჩამოტანის ღირებულება აქ არ ვიცით, ამიტომ „იყიდე / მოიცადე / გამოტოვე“ რეკომენდაციას არ ვაძლევთ.</p>`);
 }
 
 /* ---------- global card interactions ---------- */
