@@ -179,6 +179,7 @@ export function bindCardActions(getEnriched, getDeal) {
       const [type, ...rest] = h.dataset.heart.split(":"); const id = rest.join(":");
       let snap = {}; try { snap = JSON.parse(h.dataset.snap || "{}"); } catch { /* ignore */ }
       const on = wl.toggle(type, id, snap);
+      try { window.dispatchEvent(new CustomEvent("sv:heart", { detail: { type, id, on, snap } })); } catch { /* old browsers */ }
       $$(`[data-heart="${CSS.escape(h.dataset.heart)}"]`).forEach(b => { b.setAttribute("aria-pressed", String(on)); b.textContent = on ? "♥" : "♡"; });
       toast(on ? "შენახულია რჩეულებში" : "ამოღებულია რჩეულებიდან");
       return;

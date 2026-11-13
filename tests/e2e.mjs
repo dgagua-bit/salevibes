@@ -5,7 +5,7 @@ const { chromium } = createRequire(import.meta.url)("playwright");
 const BASE = process.argv[2] || "http://localhost:8765/";
 const OUT = process.env.SHOTS || "";
 const VIEWPORTS = { mobile: { width: 390, height: 844 }, tablet: { width: 820, height: 1180 }, desktop: { width: 1440, height: 900 } };
-const PAGES = ["index.html", "deals.html", "categories.html", "brands.html?b=Pinko", "stores.html", "tools.html", "saved.html"];
+const PAGES = ["index.html", "account.html", "deals.html", "categories.html", "brands.html?b=Pinko", "stores.html", "tools.html", "saved.html"];
 const results = []; let failed = 0;
 const check = (name, ok, info = "") => { console.log(`${ok ? "PASS" : "FAIL"} ${name}${info ? " — " + info : ""}`); results.push(`${ok ? "PASS" : "FAIL"} ${name}${info ? " — " + info : ""}`); if (!ok) failed++; };
 

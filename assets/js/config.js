@@ -16,6 +16,9 @@ export const SUPABASE_KEY = "sb_publishable_cRKWVslW5OztfzeT-iH_Lg_DVWeK5au";
  */
 export const PRICE_SEARCH_API = null;
 
+/** Set to true once a mail provider (RESEND_API_KEY) is configured for the `cabinet` Edge Function. */
+export const EMAIL_ALERTS_LIVE = false;
+
 /** How old a check may be before we stop calling an item ACTIVE. */
 export const FRESHNESS = {
   dealVerifiedDays: 7,   // curated store promotions are re-checked by hand

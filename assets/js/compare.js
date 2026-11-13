@@ -33,7 +33,8 @@ export function compareCard(item, fx) {
   const rec = c.best
     ? `<div class="cmp-rec"><span class="cmp-rec-k">რეკომენდაცია</span><b>ყველაზე ხელსაყრელია: ${flag(c.best.country)} ${esc(countryName(c.best.country))}</b>
        <span>≈ ${gelText(c.best.landed)} საქართველოში${c.saving >= 1 ? ` · დაზოგავ ≈ ${gelText(c.saving)} ყველაზე ძვირ ვარიანტთან შედარებით` : ""}</span>
-       <a href="${esc(safeUrl(c.best.url))}" target="_blank" rel="noopener noreferrer sponsored">მაღაზიაში ნახვა ↗</a></div>`
+       <a href="${esc(safeUrl(c.best.url))}" target="_blank" rel="noopener noreferrer sponsored">მაღაზიაში ნახვა ↗</a>
+       <button type="button" class="cmp-save" data-save-compare="${esc(item.id)}" data-title="${esc(title)}" data-url="${esc(safeUrl(c.best.url))}" data-currency="${esc(c.best.currency)}" data-price="${esc(c.best.price)}">♡ კაბინეტში შენახვა</button></div>`
     : `<div class="cmp-rec off"><b>რეკომენდაციისთვის მონაცემები არასაკმარისია</b><span>პროდუქტი არცერთ ქვეყანაში არ არის მარაგში ან კურსი მიუწვდომელია.</span></div>`;
   const rows = c.rows.map(r => `<tr class="${r === c.best ? "is-best" : ""}${r.in_stock === false ? " is-out" : ""}">
       <td>${flag(r.country)} ${esc(countryName(r.country))}</td>
@@ -58,6 +59,7 @@ export const COMPARE_CSS = `
 .cmp-rec{display:flex;flex-wrap:wrap;gap:4px 14px;align-items:baseline;border-left:3px solid #3f6b4a;background:#e9ecdf;padding:12px 14px;margin:16px 0}
 .cmp-rec b{font-size:14px;color:#2f5238}.cmp-rec span{font-size:12.5px;color:#3a3532}.cmp-rec a{font-size:12px;border-bottom:1px solid;color:#3f6b4a;margin-left:auto}
 .cmp-rec-k{font-size:10px!important;letter-spacing:1.5px;text-transform:uppercase;color:#3f6b4a!important;width:100%}
+.cmp-save{border:1px solid #3f6b4a;background:none;color:#3f6b4a;padding:6px 11px;font-size:12px;cursor:pointer}.cmp-save:hover{background:#3f6b4a;color:#fff}
 .cmp-rec.off{border-color:#8a5a12;background:#f3ead9}.cmp-rec.off b{color:#8a5a12}
 .cmp-scroll{overflow-x:auto}.cmp-table{width:100%;border-collapse:collapse;font-size:13px}
 .cmp-table th,.cmp-table td{padding:9px 8px 9px 0;border-bottom:1px solid #d6cfc4;text-align:left;white-space:nowrap}

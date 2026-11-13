@@ -1,0 +1,5 @@
+-- Applied to project fyfanpmszhopxjaerubd on 2026-11-13: user cabinet.
+-- profiles, user_interests, saved_items, link_prices — RLS: each user reads/writes only their own rows.
+-- Trigger on auth.users creates the profile row. Edge Function `cabinet` (link tracking, account deletion,
+-- unsubscribe, hourly price-alert job 'cabinet-alerts' at :11). E-mail sending needs RESEND_API_KEY.
+-- Full DDL: see migration `user_cabinet` in the project's migration history.
