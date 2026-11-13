@@ -66,11 +66,12 @@ export async function getFx() {
   return { fx, date: rows[0]?.rate_date || null };
 }
 
-/** Same product sold in several countries (currently KIKO Milano IT vs GB). */
-export function searchCompare(q) {
+/** Same product sold on a brand's regional sites (KIKO Milano, Speedo, ...). */
+export function searchCompare(q, brand = "") {
   const clean = String(q || "").replace(/[*,()%]/g, " ").trim();
-  const filter = clean ? `&or=(title.ilike.*${encodeURIComponent(clean)}*,code.ilike.*${encodeURIComponent(clean)}*,brand.ilike.*${encodeURIComponent(clean)}*)` : "";
-  return sb(`compare_items?select=id,brand,code,title,image_url,category,updated_at,compare_prices(country,currency,price,original_price,in_stock,url,checked_at)${filter}&order=updated_at.desc&limit=40`);
+  const e = encodeURIComponent(clean);
+  const filter = (clean ? `&or=(title.ilike.*${e}*,title_en.ilike.*${e}*,code.ilike.*${e}*,brand.ilike.*${e}*)` : "") + (brand ? `&brand=eq.${encodeURIComponent(brand)}` : "");
+  return sb(`compare_items?select=id,brand,code,title,title_en,image_url,category,weight_g,updated_at,compare_prices(country,currency,price,original_price,in_stock,url,checked_at)${filter}&order=updated_at.desc&limit=300`);
 }
 
 export async function priceSearch(q, countries) {

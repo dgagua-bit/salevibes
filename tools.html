@@ -58,9 +58,10 @@
 
   <section class="section" id="compare" aria-labelledby="cmp-h">
     <div class="section-head"><div><h2 id="cmp-h">ერთი პროდუქტი — სხვადასხვა ქვეყანაში</h2><p id="cmp-sub">ერთი და იგივე პროდუქტის ფასი სხვადასხვა ქვეყნის ოფიციალურ საიტზე, ლარში გადაყვანილი.</p></div></div>
-    <form class="hero-search" id="cmp-form" role="search"><label class="sr-only" for="cmp-q">პროდუქტის ძიება</label><input id="cmp-q" type="search" placeholder="პროდუქტის სახელი ან კოდი" autocomplete="off"><button class="btn btn-primary" type="submit">შედარება</button></form>
+    <div class="cmp-brands" id="cmp-brands" role="group" aria-label="ბრენდი"><button type="button" data-brand="" aria-pressed="true">ყველა ბრენდი</button></div>
+    <form class="hero-search" id="cmp-form" role="search"><label class="sr-only" for="cmp-q">პროდუქტის ძიება</label><input id="cmp-q" type="search" placeholder="პროდუქტის სახელი ან კოდი, მაგ. goggles, Fastskin" autocomplete="off"><button class="btn btn-primary" type="submit">შედარება</button></form>
     <p class="fine" id="cmp-status" role="status" aria-live="polite" style="margin-top:10px"></p>
-    <div class="panel table-scroll" id="cmp-out" hidden></div>
+    <div id="cmp-out" hidden></div>
     <div id="finder" hidden></div>
   </section>
 </div>

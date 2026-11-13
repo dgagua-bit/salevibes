@@ -120,3 +120,17 @@ test("wishlist alert matching", () => {
   assert.equal(m.filter(x => x.kind === "target").length, 1);
   assert.equal(m.filter(x => x.kind === "brand").length, 1);
 });
+
+import { compareItem } from "../assets/js/compare.js";
+test("cross-country comparison recommends the cheapest in-stock landed price", () => {
+  const item = { brand: "Speedo", code: "1", category: "fashion", weight_g: 84, compare_prices: [
+    { country: "GB", currency: "GBP", price: 22.4, original_price: 32, in_stock: true },
+    { country: "DE", currency: "EUR", price: 28, original_price: 35, in_stock: true },
+    { country: "US", currency: "USD", price: 18, original_price: 60, in_stock: false }
+  ] };
+  const c = compareItem(item, { EUR: 3, USD: 2.5, GBP: 3.5 });
+  assert.equal(c.best.country, "GB");          // 78.4 GEL vs 84 GEL; US is cheaper but out of stock
+  assert.ok(c.saving > 0);
+  assert.equal(c.weightAssumed, false);
+  assert.equal(c.rows[c.rows.length - 1].country, "US");
+});

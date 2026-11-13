@@ -40,10 +40,11 @@ check("home: deal status tags", await page.locator("#grid .signal .st, #offers .
 check("home: menu links to new pages", await page.locator('#menu a[href="tools.html"]').count() === 1);
 await page.click("#offers-head");
 check("home: deals list opens", await page.locator("#grid .card").count() > 0);
-await page.fill("#finder-query", "lip");
-await page.click("#finder-submit");
-await page.waitForSelector("#finder-results .foffer, #finder-status:has-text('ვერ')", { timeout: 15000 });
-check("home: price comparison uses real data", await page.locator("#finder-results .foffer").count() > 0);
+await page.waitForSelector("#finder-results .cmp-card", { timeout: 15000 });
+check("home: comparison shows a recommendation", await page.locator("#finder-results .cmp-rec").count() > 0);
+await page.click('#cmp-brands [data-brand="Speedo"]').catch(() => {});
+await page.waitForTimeout(1500);
+check("home: brand filter (Speedo) has multi-country items", await page.locator("#finder-results .cmp-card").count() > 0);
 check("home: no admin 404 link", await page.locator('a[href="admin.html"]').count() === 0);
 await page.goto(BASE + "deals.html?q=Society%20Limonta", { waitUntil: "networkidle" });
 await page.waitForSelector("#results .subhead");

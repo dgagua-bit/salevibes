@@ -1,5 +1,7 @@
 import { mountChrome, breakdown, fxLine, errorState, $ } from "../ui.js";
-import { getFx, searchCompare, priceSearch } from "../api.js";
+import { getFx, searchCompare, priceSearch, sb } from "../api.js";
+import { compareItem, compareCard, COMPARE_CSS } from "../compare.js";
+document.head.insertAdjacentHTML("beforeend", `<style>${COMPARE_CSS}</style>`);
 import { landedCost, carrierRate, toGel } from "../pricing.js";
 import { CARRIERS, CUSTOMS, COUNTRIES, CATEGORIES, PRICE_SEARCH_API, ESTIMATE_DEFAULTS } from "../config.js";
 import { esc, safeUrl, money, gelText, dateKa, countryName, flag, catLabel } from "../format.js";
@@ -57,25 +59,26 @@ $("#customs-box").innerHTML = `<p><span class="status ${CUSTOMS.status === "VERI
   <p class="fine">საბაჟო გამოთვლა ყოველთვის შეფასებაა. საბოლოო თანხას ადგენს შემოსავლების სამსახური.</p>`;
 
 // --- cross-country comparison (compare_items / compare_prices)
+let CMP_BRAND = "";
 async function compare(q) {
   const st = $("#cmp-status"), out = $("#cmp-out");
   st.textContent = "ვეძებ…";
   try {
-    const rows = await searchCompare(q);
-    const items = rows.map(it => {
-      const prices = (it.compare_prices || []).filter(p => Number(p.price) > 0).map(p => ({ ...p, gel: toGel(p.price, p.currency, FXR.fx) }));
-      const valid = prices.filter(p => p.gel !== null && p.in_stock !== false);
-      const best = valid.length > 1 ? valid.reduce((a, b) => (b.gel < a.gel ? b : a)) : null;
-      return { it, prices, best };
-    }).filter(x => x.prices.length > 1);
+    const rows = await searchCompare(q, CMP_BRAND);
+    const items = rows.filter(it => (it.compare_prices || []).filter(p => Number(p.price) > 0).length > 1)
+      .map(it => ({ it, c: compareItem(it, FXR.fx) })).sort((a, b) => (b.c.saving || 0) - (a.c.saving || 0));
     if (!items.length) { st.textContent = q ? "ამ ძიებით რამდენიმე ქვეყანაში ნაპოვნი პროდუქტი არ გვაქვს." : "შესადარებელი მონაცემი ჯერ არ არის."; out.hidden = true; return; }
-    const countries = [...new Set(items.flatMap(x => x.prices.map(p => p.country)))];
-    const lastCheck = items.flatMap(x => x.prices.map(p => p.checked_at)).sort().pop();
-    const brands = [...new Set(items.map(x => x.it.brand))].join(", ");
-    st.textContent = `${items.length} პროდუქტი · ${brands} · ბოლო შემოწმება ${dateKa(lastCheck)} · ფასები ოფიციალური საიტებიდან, ლარში — ეროვნული ბანკის კურსით`;
-    out.innerHTML = `<table class="data-table"><thead><tr><th>პროდუქტი</th>${countries.map(c => `<th class="num">${flag(c)} ${esc(countryName(c))}</th>`).join("")}<th>იაფია</th></tr></thead><tbody>${items.slice(0, 40).map(({ it, prices, best }) => `<tr><td><b>${esc(it.title || it.code)}</b><br><small class="muted">${esc(it.brand)} · კოდი ${esc(it.code)}</small></td>${countries.map(c => { const p = prices.find(x => x.country === c); return `<td class="num">${p ? `${p.url ? `<a href="${esc(safeUrl(p.url))}" target="_blank" rel="noopener noreferrer sponsored">${money(p.price, p.currency)}</a>` : money(p.price, p.currency)}<br><small class="muted">${p.gel !== null ? "≈ " + gelText(p.gel) : "კურსი არ არის"}${p.in_stock === false ? " · არ არის მარაგში" : ""}</small>` : "—"}</td>`; }).join("")}<td>${best ? `${flag(best.country)} ${esc(countryName(best.country))}` : "—"}</td></tr>`).join("")}</tbody></table><p class="fine">შედარება მხოლოდ ნივთის ფასს ეხება — მიწოდება და საბაჟო ქვეყნების მიხედვით განსხვავდება; გამოიყენე კალკულატორი.</p>`;
-    out.hidden = false;
+    st.textContent = `${items.length} პროდუქტი რამდენიმე ქვეყანაში · დალაგებულია დანაზოგის მიხედვით · ფასები ოფიციალური საიტებიდან, ლარში — ეროვნული ბანკის კურსით`;
+    out.className = "cmp-list"; out.innerHTML = items.slice(0, 12).map(x => compareCard(x.it, FXR.fx)).join(""); out.hidden = false;
   } catch (e) { console.error(e); st.textContent = ""; out.innerHTML = errorState("შედარების მონაცემები ვერ ჩაიტვირთა."); out.hidden = false; }
+}
+async function initBrands() {
+  try {
+    const b = await sb("compare_items?select=brand&order=brand.asc&limit=1000");
+    const brands = [...new Set(b.map(x => x.brand))];
+    $("#cmp-brands").innerHTML = `<button type="button" data-brand="" aria-pressed="true">ყველა ბრენდი</button>` + brands.map(n => `<button type="button" data-brand="${esc(n)}" aria-pressed="false">${esc(n)}</button>`).join("");
+    $("#cmp-sub").textContent = `შედარებაში: ${brands.join(", ")}. Adidas-ისა და Nike-ს საიტები ავტომატურ შემოწმებას ბლოკავს — მათ ოფიციალური პარტნიორული ფიდით დავამატებთ.`;
+  } catch { /* chips stay default */ }
 }
 $("#cmp-form").addEventListener("submit", e => { e.preventDefault(); compare($("#cmp-q").value.trim()); });
 
@@ -95,4 +98,5 @@ if (PRICE_SEARCH_API) {
 try { FXR = await getFx(); } catch { /* handled in output */ }
 $("#fx-line").textContent = fxLine(FXR);
 syncRate(); calc();
-compare("");
+initBrands(); compare("");
+$("#cmp-brands").addEventListener("click", e => { const b = e.target.closest("[data-brand]"); if (!b) return; CMP_BRAND = b.dataset.brand; $("#cmp-brands").querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", String(x === b))); compare($("#cmp-q").value.trim()); });
