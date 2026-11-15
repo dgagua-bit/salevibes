@@ -1,0 +1,25 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Just landed — airport to hotel · Georgia Guide</title><meta name="description" content="How to get from Tbilisi, Kutaisi or Batumi airport to your hotel: buses, taxi apps, shuttles, SIM cards, money, emergency numbers."><meta name="theme-color" content="#16403a"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="assets/img/icon-48.png" type="image/png"><link rel="apple-touch-icon" href="assets/img/icon-180.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="mobile-web-app-capable" content="yes"><link rel="stylesheet" href="assets/css/guide.css"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Georgian:wght@400;500;600;700&family=Noto+Serif+Georgian:wght@500;600&display=swap" rel="stylesheet"></head><body><a class="skip" href="#main">Skip to content</a><header data-gg-header></header><main id="main" class="wrap">
+<p class="eyebrow" data-t="nav.arrival"></p><h1 data-t="arrival.title"></h1><p class="lead" data-t="arrival.lead"></p>
+<div class="airport-tabs" id="airports" role="group" aria-label="Airport"></div>
+<section class="two-col">
+  <div>
+    <h2 data-t="arrival.options"></h2><div class="grid-2" id="options"></div>
+    <p class="fine" data-t="arrival.verify" style="margin-top:10px"></p>
+    <h2 style="margin-top:28px" data-t="arrival.intercity"></h2><p id="intercity" class="prose"></p>
+  </div>
+  <aside>
+    <form class="hotel-form" id="hotel-form">
+      <h2 data-t="arrival.toHotel"></h2>
+      <label for="hotel" data-t="arrival.hotelLabel"></label><input id="hotel" name="hotel" type="text" autocomplete="off" data-t-placeholder="arrival.hotelPlaceholder" required>
+      <div class="row"><button class="btn" type="submit" data-mode="transit">🚌 <span data-t="arrival.transitBtn"></span></button><button class="btn btn-ghost" type="submit" data-mode="driving">🚕 <span data-t="arrival.driveBtn"></span></button></div>
+      <div class="row"><a class="btn btn-light btn-small" id="bolt" target="_blank" rel="noopener">Bolt ↗</a><a class="btn btn-light btn-small" id="yandex" target="_blank" rel="noopener">Yandex Go ↗</a></div>
+      <p class="fine" data-t="arrival.hotelHint"></p>
+    </form>
+  </aside>
+</section>
+<section><h2 data-t="arrival.sim"></h2><div class="prose" id="sim"></div></section>
+<section><h2 data-t="arrival.money"></h2><div class="prose" id="money"></div></section>
+<section><h2 data-t="arrival.emergency"></h2><div class="emergency" id="emergency"></div></section>
+<section><h2 data-t="arrival.essentials"></h2><div class="kv" id="essentials"></div></section>
+<p><a class="btn" href="routes.html" data-t="arrival.nextStep"></a></p>
+</main><footer data-gg-footer></footer><nav data-gg-tabs></nav><script type="module" src="assets/js/pages/arrival.js"></script></body></html>

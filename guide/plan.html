@@ -1,0 +1,11 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>My plan · Georgia Guide</title><meta name="description" content="Your selected routes and saved places on one map, with rest stops and restaurants."><meta name="theme-color" content="#16403a"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="assets/img/icon-48.png" type="image/png"><link rel="apple-touch-icon" href="assets/img/icon-180.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="mobile-web-app-capable" content="yes"><link rel="stylesheet" href="assets/vendor/leaflet/leaflet.css"><link rel="stylesheet" href="assets/css/guide.css"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Georgian:wght@400;500;600;700&family=Noto+Serif+Georgian:wght@500;600&display=swap" rel="stylesheet"></head><body><a class="skip" href="#main">Skip to content</a><header data-gg-header></header><main id="main" class="wrap">
+<p class="eyebrow" data-t="nav.plan"></p><h1 data-t="plan.title"></h1><p class="lead" data-t="plan.lead"></p>
+<div class="plan-actions no-print"><button type="button" class="btn btn-small" id="share" data-t="plan.share"></button><button type="button" class="btn btn-small btn-ghost" id="print" data-t="plan.print"></button><button type="button" class="btn btn-small btn-danger" id="clear" data-t="plan.clear"></button></div>
+<div id="empty" class="empty" hidden></div>
+<div id="content">
+  <section><h2 data-t="plan.mapTitle"></h2><div id="map" class="map map-tall" role="region" aria-label="Map"></div></section>
+  <section><h2 data-t="plan.routes"></h2><div class="grid" id="routes"></div></section>
+  <section><h2 data-t="plan.placesSaved"></h2><div class="grid" id="places"></div></section>
+  <section><h2 data-t="plan.stops"></h2><div class="grid" id="stops"></div></section>
+</div>
+</main><footer data-gg-footer></footer><nav data-gg-tabs></nav><script src="assets/vendor/leaflet/leaflet.js"></script><script type="module" src="assets/js/pages/plan.js"></script></body></html>
