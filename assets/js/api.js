@@ -37,7 +37,7 @@ export async function sb(path, { cache = true, timeout = 15000 } = {}) {
 }
 
 const DEAL_COLS = "id,created_at,store,store_slug,country,category,title,description,tags,discount_percent,promo_code,deal_score,sale_url,start_date,end_date,last_checked,status,image_url";
-const STORE_COLS = "id,name,slug,country,currency,base_url,category,active,last_crawled_at,worlds,audience,brands,sort_order,logo_url";
+const STORE_COLS = "id,name,slug,country,currency,base_url,category,active,last_crawled_at,worlds,audience,brands,sort_order,logo_url,platform";
 const OFFER_COLS = "id,product_id,current_price,original_price,currency,discount_pct,deal_score,price_signal,in_stock,status,first_seen_at,last_seen_at,score_breakdown," +
   "products(id,title,brand,sku,category,product_url,image_url,updated_at,stores(name,slug,country,currency,base_url,logo_url))";
 
@@ -68,9 +68,10 @@ export async function getFx() {
 
 /** Same product sold on a brand's regional sites (KIKO Milano, Speedo, ...). */
 export function searchCompare(q, brand = "") {
-  const clean = String(q || "").replace(/[*,()%]/g, " ").trim();
-  const e = encodeURIComponent(clean);
-  const filter = (clean ? `&or=(title.ilike.*${e}*,title_en.ilike.*${e}*,code.ilike.*${e}*,brand.ilike.*${e}*)` : "") + (brand ? `&brand=eq.${encodeURIComponent(brand)}` : "");
+  // every word must appear somewhere (title, English title, code or brand): "speedo goggles" → Speedo AND goggles
+  const words = String(q || "").replace(/[*,()%"]/g, " ").split(/\s+/).filter(w => w.length > 1).slice(0, 5);
+  const one = w => { const e = encodeURIComponent(w); return `or(title.ilike.*${e}*,title_en.ilike.*${e}*,code.ilike.*${e}*,brand.ilike.*${e}*)`; };
+  const filter = (words.length ? `&and=(${words.map(one).join(",")})` : "") + (brand ? `&brand=eq.${encodeURIComponent(brand)}` : "");
   return sb(`compare_items?select=id,brand,code,title,title_en,image_url,category,weight_g,updated_at,compare_prices(country,currency,price,original_price,in_stock,url,checked_at)${filter}&order=updated_at.desc&limit=300`);
 }
 

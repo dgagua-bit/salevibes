@@ -22,9 +22,9 @@ export function mountChrome(active) {
     h.className = "site-header" + (active === "home" ? " over" : "");
     h.innerHTML = `<div class="wrap header-row">
       <a class="logo" href="./" aria-label="Sale Vibes — მთავარი"><img class="logo-img" src="assets/img/logo-dark.png" alt="Sale Vibes" width="425" height="281"></a>
-      <nav class="main-nav" id="main-nav" aria-label="მთავარი ნავიგაცია"><ul><li class="nav-search"><form action="deals.html" role="search"><label class="sr-only" for="mq">ძიება</label><input id="mq" name="q" type="search" placeholder="ძიება: პროდუქტი, ბრენდი, SKU…"></form></li>${NAV.map(n => `<li><a href="${n.href}"${n.id === active ? ' aria-current="page"' : ""}>${n.label}</a></li>`).join("")}</ul></nav>
+      <nav class="main-nav" id="main-nav" aria-label="მთავარი ნავიგაცია"><ul><li class="nav-search"><form action="search.html" role="search"><label class="sr-only" for="mq">ძიება</label><input id="mq" name="q" type="search" placeholder="ძიება: პროდუქტი, ბრენდი, SKU…"></form></li>${NAV.map(n => `<li><a href="${n.href}"${n.id === active ? ' aria-current="page"' : ""}>${n.label}</a></li>`).join("")}</ul></nav>
       <div class="header-tools">
-        <form class="header-search" action="deals.html" role="search"><label class="sr-only" for="hq">ძიება</label><input id="hq" name="q" type="search" placeholder="პროდუქტი, ბრენდი, SKU…" autocomplete="off"><button type="submit" aria-label="ძიება">⌕</button></form>
+        <form class="header-search" action="search.html" role="search"><label class="sr-only" for="hq">ძიება</label><input id="hq" name="q" type="search" placeholder="პროდუქტი, ბრენდი, SKU…" autocomplete="off"><button type="submit" aria-label="ძიება">⌕</button></form>
         <a class="saved-link" href="saved.html"${active === "saved" ? ' aria-current="page"' : ""} aria-label="რჩეულები"><span aria-hidden="true">♡</span><span class="saved-txt">რჩეულები</span> <b data-saved-count>${wl.count()}</b></a>
         <button class="nav-toggle" type="button" aria-controls="main-nav" aria-expanded="false" aria-label="მენიუ"><i></i><i></i><i></i></button>
       </div></div>`;
@@ -32,7 +32,7 @@ export function mountChrome(active) {
     btn.addEventListener("click", () => { const open = btn.getAttribute("aria-expanded") !== "true"; btn.setAttribute("aria-expanded", String(open)); nav.classList.toggle("open", open); });
     document.addEventListener("keydown", e => { if (e.key === "Escape" && nav.classList.contains("open")) { nav.classList.remove("open"); btn.setAttribute("aria-expanded", "false"); btn.focus(); } });
     const q = new URLSearchParams(location.search).get("q");
-    if (q && active === "deals") $("#hq", h).value = q;
+    if (q && (active === "deals" || active === "search")) $("#hq", h).value = q;
   }
   const f = $("[data-sv-footer]");
   if (f) {

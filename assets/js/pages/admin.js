@@ -237,6 +237,13 @@ async function renderFeedback() {
   $("#fb-list").innerHTML = fb.length ? `<ul class="list-plain">${fb.slice(0, 50).map(f => `<li><span><b>${"★".repeat(f.rating)}${"☆".repeat(5 - f.rating)}</b> ${f.comment ? esc(f.comment) : '<span class="muted">კომენტარის გარეშე</span>'}<br><small class="muted">${esc(dateKa(f.created_at))} · ${esc(f.page || "")} · ${esc(f.device || "")}</small></span></li>`).join("")}</ul>` : emptyState("შეფასება ჯერ არ არის.");
   const rows = (title, list) => `<h3 class="acct-h3">${title}</h3><table class="data-table"><tbody>${list.map(([k, n]) => `<tr><td>${esc(k)}</td><td class="num">${n}</td></tr>`).join("")}</tbody></table>`;
   $("#pv-list").innerHTML = pv.length ? rows("ყველაზე ნანახი გვერდები", top(pv, "path")) + rows("საიდან მოდიან", top(pv, "referrer")) : emptyState("ვიზიტები ჯერ არ არის.");
+  // what people search for, and what they could not find (→ which stores or products to add)
+  let sl = [];
+  try { sl = await q(supa.from("search_log").select("q,results,created_at").gte("created_at", new Date(Date.now() - 30 * 864e5).toISOString()).order("created_at", { ascending: false }).limit(5000)); } catch { /* optional */ }
+  const tally = list => Object.values(list.reduce((m, x) => { const k = x.q.toLowerCase(); (m[k] ||= { q: x.q, n: 0, r: x.results }).n++; return m; }, {})).sort((a, b) => b.n - a.n).slice(0, 15);
+  const srows = (title, note, list) => `<div><h3 class="acct-h3">${title}</h3><p class="fine">${note}</p>${list.length ? `<table class="data-table"><tbody>${list.map(x => `<tr><td><a class="link" href="search.html?q=${encodeURIComponent(x.q)}" target="_blank" rel="noopener">${esc(x.q)}</a></td><td class="num">${x.n}×</td><td class="num"><small>${x.r} შედეგი</small></td></tr>`).join("")}</tbody></table>` : emptyState("ჯერ არაფერი.")}</div>`;
+  $("#sl-list").innerHTML = srows("რას ეძებენ (30 დღე)", `სულ ${sl.length} ძიება.`, tally(sl))
+    + srows("რა ვერ იპოვეს", "ამ პროდუქტებისთვის ჩვენს მაღაზიებში შედეგი არ იყო — კარგი მინიშნებაა, რომელი მაღაზია დავამატოთ.", tally(sl.filter(x => !x.results)));
 }
 
 boot().catch(e => say(e.message, "err"));

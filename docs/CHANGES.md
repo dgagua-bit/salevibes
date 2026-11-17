@@ -92,3 +92,21 @@
   - **Link gone** (404/410, or redirects to the homepage) **twice in a row:** the deal is expired.
   - **Store blocks bots:** a note only; the deal is flagged for a manual check.
 - In the cabinet's settings, admins see an "ადმინ-პანელი" link. Signing in from `account.html?next=admin.html` goes straight to the panel.
+
+## Product search: best price first, then alternatives
+- New page `search.html`. Every search box on the site now opens it; the home-page search overlay included.
+- **Sources, queried in parallel:**
+  - Live search on every store whose site has a public product search. Today that is 13 stores, mostly Shopify (the Edge Function `live-search`, cached 30 min, capped at 40 fresh searches per minute).
+  - Our crawled catalogue.
+  - The cross-country brand prices in `compare_items`.
+- **Every result is priced the same way:** "≈ in Georgia" = price + shipping + customs, an estimate from `pricing.js`.
+  - The card at the top is the cheapest in-stock exact match.
+  - Below it, the alternatives are sorted by that total.
+- **Same product across stores:** titles are reduced to a key: model words + canonical size (3.4 oz → 100ml, Eau de Parfum → edp), without colours, genders, style codes or filler words.
+  - Only identical keys count as the same product. "Save up to X" is shown only for the same product at other stores.
+  - Variant chips ("Eau de Parfum 100ml", "Samba OG"…) narrow the comparison to one product.
+- **Kids' versions and side products** (deodorant, laces…) move to a "similar" section unless the query asks for them.
+- **Georgian queries work:** brand names (ნაიკი → nike), common words (სუნამო → parfum) and transliteration. Typos are tolerated in words of 5+ letters.
+- **Store sales and categories that match the query are shown too.** A bare category word ("ფეხსაცმელი") opens with the category link and its sales.
+- **Stores without a public search** get one-click links to search them on Google.
+- **The admin panel shows searches over 30 days:** what people search for, and which searches found nothing.

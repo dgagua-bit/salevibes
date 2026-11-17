@@ -285,7 +285,7 @@ document.querySelectorAll("[data-look]").forEach(b=>b.addEventListener("click",(
 /* quick search */
 const qs=$("#qs"),qsBtn=$("#search-open");
 function setQs(open){qs.hidden=!open;qsBtn.setAttribute("aria-expanded",String(open));document.body.classList.toggle("search-open",open);if(open){if(menu.open)closeMenu();if(cpKey)closeCatPanel();setTimeout(()=>$("#qs-input").focus(),30)}}
-function runQs(q){q=String(q||"").trim();setQs(false);$("#search").value=q;category="";DEAL_TAG="";DEAL_LIMIT=12;fillFilters();if(q&&!filteredDeals().length&&[...brandIndex().keys()].some(k=>k.includes(q.toLowerCase()))){$("#search").value="";$("#brand-input").value=q;selectBrand(q);$("#brands").scrollIntoView({behavior:"smooth"});return}setOffers(true);renderDeals();$("#offers").scrollIntoView({behavior:"smooth"})}
+function runQs(q){q=String(q||"").trim();if(q){location.href="search.html?q="+encodeURIComponent(q);return}setQs(false);$("#search").value=q;category="";DEAL_TAG="";DEAL_LIMIT=12;fillFilters();if(q&&!filteredDeals().length&&[...brandIndex().keys()].some(k=>k.includes(q.toLowerCase()))){$("#search").value="";$("#brand-input").value=q;selectBrand(q);$("#brands").scrollIntoView({behavior:"smooth"});return}setOffers(true);renderDeals();$("#offers").scrollIntoView({behavior:"smooth"})}
 qsBtn.onclick=e=>{e.stopPropagation();setQs(qs.hidden)};
 $("#qs-form").addEventListener("submit",e=>{e.preventDefault();runQs($("#qs-input").value)});
 $("#qs-chips").addEventListener("click",e=>{const b=e.target.closest("[data-q]");if(b){$("#qs-input").value=b.dataset.q;runQs(b.dataset.q)}});

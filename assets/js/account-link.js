@@ -44,6 +44,24 @@ document.addEventListener("click", e => {
   });
 });
 
+// "♡ შენახვა" on live search results: save the store link itself; the cabinet keeps tracking its price
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-save-link]");
+  if (!b) return;
+  e.preventDefault();
+  withAuth(async auth => {
+    b.disabled = true;
+    try {
+      const url = auth.normalizeLink(b.dataset.saveLink);
+      await auth.saveItem({
+        kind: "link", url, item_key: url, title: b.dataset.title || null, store: b.dataset.store || null, image_url: b.dataset.image || null,
+        currency: b.dataset.currency || null, price_at_save: Number(b.dataset.price) || null, last_price: Number(b.dataset.price) || null, track_status: "tracking"
+      });
+      b.textContent = "♥ შენახულია";
+    } catch { b.textContent = "შენახვა ვერ მოხერხდა"; b.disabled = false; }
+  });
+});
+
 // ♡ on catalogue cards (ui.js dispatches sv:heart): mirror into the account when signed in
 window.addEventListener("sv:heart", ev => {
   if (!signedIn()) return;

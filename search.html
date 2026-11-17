@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="ka">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>პროდუქტის ძიება — SaleVibes</title>
+<meta name="description" content="მოძებნე კონკრეტული პროდუქტი და ნახე, სად ღირს ყველაზე იაფად საქართველოში მიტანით.">
+<meta name="theme-color" content="#f0ede7">
+
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://fyfanpmszhopxjaerubd.supabase.co" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Georgian:wght@400;500;600;700&family=Noto+Serif+Georgian:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/main.css">
+<script type="module" src="assets/js/pages/search.js"></script>
+<link rel="icon" href="assets/img/icon-48.png" type="image/png"><link rel="apple-touch-icon" href="assets/img/icon-180.png">
+</head>
+<body>
+<a class="skip" href="#main">გადასვლა მთავარ შიგთავსზე</a>
+<header data-sv-header></header>
+<main id="main">
+<div class="wrap">
+  <div class="page-head srch-top"><p class="eyebrow">პროდუქტის ძიება</p><h1>სად ღირს ყველაზე იაფად?</h1>
+    <form class="hero-search" id="s-form" role="search"><label class="sr-only" for="s-q">პროდუქტის ძიება</label><input id="s-q" name="q" type="search" placeholder="მაგ. Adidas Samba, Dior Sauvage 100ml, Nike Air Max 90" autocomplete="off"><button type="submit">ძებნა</button></form>
+    <div class="srch-bar"><span id="s-count"></span>
+      <label>დალაგება <select id="s-sort"><option value="landed">საქართველოში ყველაზე იაფი</option><option value="discount">ყველაზე დიდი ფასდაკლება</option></select></label>
+      <label class="check"><input type="checkbox" id="s-stock" checked> მხოლოდ მარაგში</label></div>
+    <p class="fine" id="s-src"></p>
+  </div>
+  <div id="s-out" aria-live="polite"></div>
+  <section id="s-elsewhere" class="section" hidden></section>
+  <p class="fine srch-note">„საქართველოში“ = ნივთის ფასი + ტრანსპორტირება (წონა დაშვებულია კატეგორიის მიხედვით, ტარიფი საორიენტაციოა) + საბაჟო, თუ ჯამი ლიმიტს აჭარბებს. ეს შეფასებაა — საბოლოო ფასი მაღაზიაში და გადამზიდავთან გადაამოწმე. მაღაზიის შიდა მიწოდება ჩათვლილი არ არის.</p>
+</div>
+</main>
+<footer data-sv-footer></footer>
+<noscript><p class="wrap notice">ძიებისთვის საჭიროა JavaScript.</p></noscript>
+<script type="module" src="assets/js/engage.js"></script>
+<script type="module" src="assets/js/account-link.js"></script>
+</body>
+</html>
