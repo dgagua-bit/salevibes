@@ -9,7 +9,7 @@
  * and the cheapest in-stock exact match is the "best price".
  */
 import { esc, safeUrl, money, gelText, flag, countryName } from "./format.js";
-import { getFx, getOffers, searchCompare } from "./api.js";
+import { getFx, getOffers, getStores, searchCompare } from "./api.js";
 import { landedCost, toGel } from "./pricing.js";
 import { SUPABASE_URL, SUPABASE_KEY } from "./config.js";
 
@@ -61,8 +61,9 @@ function sizes(title) {
   });
   return out;
 }
+const joinVersion = s => s.replace(/\b(\d{2,4}) (v\d{1,2})\b/g, "$1$2"); // "1080 v15" → "1080v15"
 export function productKey(title) {
-  let s = " " + norm(String(title).replace(SIZE_RE, " ").replace(CODE_RE, " ")) + " ";
+  let s = " " + joinVersion(norm(String(title).replace(SIZE_RE, " ").replace(CODE_RE, " "))) + " ";
   for (const [re, v] of PHRASES) s = s.replace(re, v);
   const words = s.split(" ").filter(w => w.length > 1 && !STOP.has(w) && !COLORS.has(w));
   return [...new Set([...words, ...sizes(title)])].sort().join(" ");
@@ -71,6 +72,52 @@ export function productKey(title) {
 const KIDS = /\b(kids?|junior|jr|baby|babies|infants?|toddlers?|child|children|boys|girls|youth|gs|ps|td)\b/;
 const SIDE = /\b(deodorant|deo|shower gel|body lotion|lotion|aftershave|after shave|socks?|laces?|insoles?|cleaner|samples?|miniature|keyrings?|keychains?)\b/;
 export const secondary = (title, q) => { const t = norm(title), qq = norm(q); return (KIDS.test(t) && !KIDS.test(qq)) || (SIDE.test(t) && !SIDE.test(qq)); };
+
+/* brand names typed without spaces ("newbalance", "calvinklein") → the spaced form store titles use.
+   Built from the brands our stores carry, plus a few model names. */
+const MODEL_ALIASES = { airmax: "air max", airforce: "air force", airjordan: "air jordan", thenorthface: "the north face", northface: "the north face" };
+let aliasPromise = null;
+function brandAliases() {
+  aliasPromise ||= getStores().then(rows => {
+    const m = { ...MODEL_ALIASES };
+    for (const st of rows || []) for (const b of [st.name, ...(st.brands || [])]) { const n = norm(b); if (n.includes(" ")) m[n.replace(/ /g, "")] = n; }
+    return m;
+  }).catch(() => ({ ...MODEL_ALIASES }));
+  return aliasPromise;
+}
+const expandQuery = (q, aliases) => norm(q).split(" ").map(t => aliases[t] || t).join(" ");
+
+/** The query is just a brand ("new balance", "nike") when every word is part of most results' brand. Returns the brand or null. */
+export function brandOf(items, terms) {
+  const withBrand = items.filter(x => x.brand);
+  if (withBrand.length < 3 || !terms.length) return null;
+  const hits = withBrand.filter(x => { const b = norm(x.brand); return terms.every(t => b.includes(t)); });
+  if (hits.length / withBrand.length < 0.6) return null;
+  const c = {}; hits.forEach(x => { c[x.brand] = (c[x.brand] || 0) + 1; });
+  return Object.entries(c).sort((a, b) => b[1] - a[1])[0][0];
+}
+// model numbers: 9060, 550, 1906R, T500, 1080v15, 990v6 (not sizes, not long style codes)
+const MODEL_RE = /^(?:[a-z]{0,2}\d{3,4}[a-z]{0,2}|\d{3,4}v\d{1,2})$/;
+/** The models that appear in at least two results — for a "which model?" picker after a brand-only search. */
+export function modelsOf(items, brand) {
+  const bw = new Set(norm(brand).split(" ")), c = new Map();
+  for (const it of items) {
+    const seen = new Set();
+    for (const t of joinVersion(norm(String(it.title).replace(SIZE_RE, " "))).split(" ")) {
+      if (bw.has(t) || seen.has(t) || !MODEL_RE.test(t) || /^(19|20)\d\d$/.test(t)) continue;
+      seen.add(t); c.set(t, (c.get(t) || 0) + 1);
+    }
+  }
+  return [...c.entries()].filter(([, n]) => n >= 2).sort((a, b) => b[1] - a[1]).slice(0, 10).map(([model, n]) => ({ model, n }));
+}
+/** After a brand-only search: buttons that re-run the search for one model (each carries the full new query in data-q),
+    plus a hint to type the model. Empty when the query was not just a brand. */
+export function modelChipsHTML(models, baseQuery, brand) {
+  if (!brand) return "";
+  return `<div class="srch-models"><p>რომელი მოდელი? <small>აირჩიე — შევადარებთ ზუსტად მის ფასებს სხვადასხვა მაღაზიაში</small></p>
+    ${models.map(m => `<button type="button" class="srch-mchip" data-q="${esc(`${baseQuery} ${m.model}`)}">${esc(m.model.toUpperCase())} <b>${m.n}</b></button>`).join("")}
+    <small class="srch-hint">${models.length ? "სხვა მოდელი? " : ""}ჩაწერე ძიებაში ბრენდი და მოდელი ერთად, მაგ. „${esc(brand)} ${esc(models[0]?.model.toUpperCase() || "…")}“ — ასე შევადარებთ ზუსტად იმ პროდუქტს.</small></div>`;
+}
 
 /** Clusters items by productKey; sets it.group on each item. Groups sold by the most stores first. */
 export function groupItems(list) {
@@ -111,7 +158,7 @@ function priceItem(it, fx) {
  *   live    — live-search meta ({ stores_answered, at }) or null when it was unavailable
  */
 export async function findProducts(q, { fx } = {}) {
-  const terms = queryTerms(q);
+  const terms = queryTerms(expandQuery(q, await brandAliases()));
   const [fxr, live, offers, cmp] = await Promise.allSettled([fx && Object.keys(fx).length ? Promise.resolve({ fx }) : getFx(), liveSearch(terms.join(" ")), getOffers(), searchCompare(terms.join(" "))]);
   const FX = fxr.status === "fulfilled" ? fxr.value.fx || {} : {};
   const all = [
@@ -142,12 +189,20 @@ export const pickBest = sorted => sorted.find(x => x.in_stock && x.landed != nul
 export const storeCount = list => new Set(list.map(x => x.store)).size;
 
 /* ---------- rendering ---------- */
+/** Some stores leave the brand out of the title ("Sneakers T500 Drift Red") — put it back in front. */
+const BRAND_SUFFIX = /\b(running|sportswear|originals|performance|kids|men|women|official|inc|ltd|llc|spa|gmbh)\b/g;
+const tidyBrand = b => { const t = String(b || "").trim(); return t === t.toUpperCase() && t.replace(/[^A-Za-z]/g, "").length > 4 ? t.toLowerCase().replace(/(^|[\s-])\p{L}/gu, m => m.toUpperCase()) : t; };
+export const displayTitle = it => {
+  if (!it.brand) return it.title;
+  const core = norm(it.brand).replace(BRAND_SUFFIX, " ").replace(/\s+/g, " ").trim();
+  return core && !norm(it.title).includes(core) ? `${tidyBrand(it.brand).replace(/\s+(Running|Sportswear|Originals|Performance)$/i, "")} ${it.title}` : it.title;
+};
 const buyBtn = it => `<a class="srch-btn" href="${esc(safeUrl(it.url))}" target="_blank" rel="noopener noreferrer sponsored">მაღაზიაში ნახვა ↗</a>`;
-const saveBtn = (it, cls = "") => `<button type="button" class="srch-btn ghost${cls}" data-save-link="${esc(safeUrl(it.url))}" data-title="${esc(it.title)}" data-store="${esc(it.store)}" data-image="${esc(it.image || "")}" data-currency="${esc(it.currency)}" data-price="${esc(it.price)}">♡ შენახვა</button>`;
+const saveBtn = (it, cls = "") => `<button type="button" class="srch-btn ghost${cls}" data-save-link="${esc(safeUrl(it.url))}" data-title="${esc(displayTitle(it))}" data-store="${esc(it.store)}" data-image="${esc(it.image || "")}" data-currency="${esc(it.currency)}" data-price="${esc(it.price)}">♡ შენახვა</button>`;
 const img = it => it.image ? `<img src="${esc(safeUrl(it.image))}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.parentNode.classList.add('noimg');this.remove()">` : "";
 
 /** The "best price in Georgia" card. Savings are claimed only against the same product at other stores (call groupItems first). */
-export function bestCardHTML(best) {
+export function bestCardHTML(best, { label = "საუკეთესო ფასი საქართველოში" } = {}) {
   const byStore = new Map();
   for (const x of best.group ? best.group.items : []) if (x.store !== best.store && x.in_stock && x.landed != null) byStore.set(x.store, Math.min(byStore.get(x.store) ?? Infinity, x.landed));
   const dearer = [...byStore.values()].filter(v => v > best.landed);
@@ -155,8 +210,8 @@ export function bestCardHTML(best) {
   return `<article class="srch-best">
     <div class="srch-best-img${best.image ? "" : " noimg"}">${img(best)}</div>
     <div class="srch-best-body">
-      <p class="srch-eyebrow">საუკეთესო ფასი საქართველოში</p>
-      <h3>${esc(best.title)}</h3>
+      <p class="srch-eyebrow">${esc(label)}</p>
+      <h3>${esc(displayTitle(best))}</h3>
       <p class="srch-meta">${flag(best.country)} <b>${esc(best.store)}</b> · ${esc(countryName(best.country))}${best.in_stock ? "" : " · არ არის მარაგში"}</p>
       <div class="srch-price"><b>≈ ${gelText(best.landed)}</b><span>საქართველოში მიტანით${best.taxable ? " და საბაჟოთი" : ""}</span></div>
       <p class="srch-sub">მაღაზიის ფასი ${money(best.price, best.currency)}${best.original_price ? ` <s>${money(best.original_price, best.currency)}</s> <em>−${best.disc}%</em>` : ""} · ≈ ${gelText(best.gel)}</p>
@@ -169,7 +224,7 @@ export function rowHTML(it, i) {
   return `<li class="srch-row${it.in_stock ? "" : " is-out"}">
     <span class="srch-rank">${i + 1}</span>
     <span class="srch-thumb${it.image ? "" : " noimg"}">${img(it)}</span>
-    <span class="srch-info"><a href="${esc(safeUrl(it.url))}" target="_blank" rel="noopener noreferrer sponsored">${esc(it.title)}</a>
+    <span class="srch-info"><a href="${esc(safeUrl(it.url))}" target="_blank" rel="noopener noreferrer sponsored">${esc(displayTitle(it))}</a>
       <small>${flag(it.country)} ${esc(it.store)} · ${esc(countryName(it.country))}${it.in_stock ? "" : " · <b>არ არის მარაგში</b>"}</small></span>
     <span class="srch-p"><b>${money(it.price, it.currency)}</b>${it.disc ? ` <em>−${it.disc}%</em>` : ""}<small>≈ ${gelText(it.gel)}</small></span>
     <span class="srch-l"><b>${it.landed != null ? "≈ " + gelText(it.landed) : "—"}</b><small>საქართველოში</small></span>
@@ -215,6 +270,9 @@ export const SEARCH_CSS = `
 .srch-info small,.srch-p small,.srch-l small{display:block;color:var(--muted,#6f665d);font-size:12px}
 .srch-p,.srch-l{text-align:right}.srch-l b{font-size:1.05rem}
 .srch-link{color:inherit;border-bottom:1px solid currentColor;text-decoration:none}
+.srch-models{margin:4px 0 18px;text-align:left}.srch-models p{margin:0 0 8px;font-weight:600}.srch-models small{font-weight:400;color:var(--muted,#6f665d)}
+.srch-mchip{display:inline-flex;align-items:center;gap:6px;min-height:38px;padding:7px 13px;margin:0 6px 6px 0;border:1px solid #c9c3b9;background:transparent;color:inherit;font:inherit;font-size:13px;cursor:pointer}
+.srch-mchip:hover{border-color:var(--ink,#181614);background:var(--ink,#181614);color:#fff}.srch-hint{display:block;margin-top:4px;color:var(--muted,#6f665d);font-size:12.5px}.srch-mchip b{font-weight:500;color:var(--muted,#6f665d)}.srch-mchip:hover b{color:#ddd}
 .spin{display:inline-block;vertical-align:middle;width:18px;height:18px;border:2px solid #c9c3b9;border-top-color:var(--accent,#9f2529);border-radius:50%;animation:srchspin .8s linear infinite}
 @keyframes srchspin{to{transform:rotate(360deg)}}
 @media (prefers-reduced-motion:reduce){.spin{animation:none}}

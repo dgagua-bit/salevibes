@@ -1,7 +1,7 @@
 import { mountChrome, breakdown, fxLine, errorState, $ } from "../ui.js";
 import { getFx, searchCompare, priceSearch, sb } from "../api.js";
 import { compareItem, compareCard, COMPARE_CSS } from "../compare.js";
-import { findProducts, groupItems, sortItems, pickBest, storeCount, bestCardHTML, rowHTML, SEARCH_CSS } from "../search-engine.js";
+import { findProducts, groupItems, sortItems, pickBest, storeCount, bestCardHTML, rowHTML, brandOf, modelsOf, modelChipsHTML, SEARCH_CSS } from "../search-engine.js";
 document.head.insertAdjacentHTML("beforeend", `<style>${COMPARE_CSS}${SEARCH_CSS}</style>`);
 import { landedCost, carrierRate, toGel } from "../pricing.js";
 import { CARRIERS, CUSTOMS, COUNTRIES, CATEGORIES, PRICE_SEARCH_API, ESTIMATE_DEFAULTS } from "../config.js";
@@ -84,9 +84,9 @@ async function findBest(q) {
     const list = sortItems(r.items);
     if (!list.length) { st.innerHTML = `„${esc(q)}“ ზუსტად ვერ ვიპოვეთ ჩვენს მაღაზიებში. <a class="srch-link" href="${full}">სრული ძიება — აქციები და სხვა მაღაზიები →</a>`; return; }
     groupItems(list);
-    const best = pickBest(list), rest = list.filter(x => x !== best);
+    const best = pickBest(list), rest = list.filter(x => x !== best), brand = brandOf(list, r.terms), models = brand ? modelsOf(list, brand) : [];
     st.textContent = `${list.length} შეთავაზება ${storeCount(list)} მაღაზიაში · ზემოთ — საუკეთესო ფასი საქართველოში მიტანით, ქვემოთ — ალტერნატივები`;
-    out.innerHTML = bestCardHTML(best)
+    out.innerHTML = modelChipsHTML(models, q, brand) + bestCardHTML(best, brand ? { label: `ყველაზე იაფი ${brand} — ამ მაღაზიებში` } : undefined)
       + (rest.length ? `<h3 class="srch-h">ალტერნატივები <small>— დალაგებულია საქართველოში ჯამური ფასით</small></h3><ol class="srch-list">${rest.slice(0, 5).map((x, i) => rowHTML(x, i + 1)).join("")}</ol>` : "")
       + `<p class="srch-actions"><a class="srch-btn ghost" href="${full}">ყველა შედეგი და ვარიანტები (${list.length}) →</a></p>`;
     out.hidden = false;
@@ -101,6 +101,7 @@ async function initBrands() {
   } catch { /* chips stay default */ }
 }
 $("#cmp-form").addEventListener("submit", e => { e.preventDefault(); compare($("#cmp-q").value.trim()); });
+$("#cmp-out").addEventListener("click", e => { const m = e.target.closest(".srch-mchip[data-q]"); if (!m) return; $("#cmp-q").value = m.dataset.q; compare(m.dataset.q); });
 
 // --- optional external finder, only when an API is actually deployed
 if (PRICE_SEARCH_API) {

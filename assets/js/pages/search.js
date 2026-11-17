@@ -6,12 +6,12 @@ import { mountChrome, $, emptyState, dealCard, bindCardActions } from "../ui.js"
 import { esc, flag, countryName, hostOf, catLabel } from "../format.js";
 import { getStores, getDeals } from "../api.js";
 import { CATEGORIES } from "../config.js";
-import { SYN, norm, queryTerms, findProducts, groupItems, sortItems, pickBest, storeCount, bestCardHTML, rowHTML, listHeadHTML, SEARCH_CSS } from "../search-engine.js";
+import { SYN, norm, queryTerms, findProducts, groupItems, sortItems, pickBest, storeCount, bestCardHTML, rowHTML, listHeadHTML, brandOf, modelsOf, modelChipsHTML, SEARCH_CSS } from "../search-engine.js";
 
 mountChrome("search");
 document.head.insertAdjacentHTML("beforeend", `<style>${SEARCH_CSS}</style>`);
 const params = new URLSearchParams(location.search);
-const S = { q: (params.get("q") || "").trim(), sort: "landed", stock: true, items: [], similar: [], live: null, group: null, deals: [], cats: [], browse: false };
+const S = { q: (params.get("q") || "").trim(), sort: "landed", stock: true, items: [], similar: [], live: null, group: null, deals: [], cats: [], browse: false, terms: [] };
 const dealById = new Map();
 bindCardActions(null, id => dealById.get(String(id)));
 const sorted = list => sortItems(list, S);
@@ -61,10 +61,13 @@ function render() {
   const best = pickBest(pool);
   const rest = pool.filter(x => x !== best);
   const multi = groups.filter(g => g.items.length > 1).slice(0, 8);
-  const chips = multi.length && groups.length > 1 ? `<div class="srch-variants"><p>ზუსტად რომელი? <small>აირჩიე — შევადარებთ მხოლოდ ამ პროდუქტის ფასებს</small></p><div class="chips">
+  // a brand-only query ("new balance"): offer its models instead of colour variants, and say what the price card is
+  const brand = S.group == null ? brandOf(list, S.terms) : null;
+  const models = brand ? modelsOf(list, brand) : [];
+  const chips = brand ? modelChipsHTML(models, S.q, brand) : multi.length && groups.length > 1 ? `<div class="srch-variants"><p>ზუსტად რომელი? <small>აირჩიე — შევადარებთ მხოლოდ ამ პროდუქტის ფასებს</small></p><div class="chips">
       <button type="button" class="chip" data-g="" aria-pressed="${S.group == null}">ყველა (${list.length})</button>
       ${multi.map(g => `<button type="button" class="chip" data-g="${esc(g.key)}" aria-pressed="${S.group === g.key}">${esc(g.label.length > 44 ? g.label.slice(0, 42) + "…" : g.label)} <b>${g.stores > 1 ? g.stores + " მაღაზია" : g.items.length}</b></button>`).join("")}</div></div>` : "";
-  out.innerHTML = catBlock() + chips + bestCardHTML(best)
+  out.innerHTML = catBlock() + chips + bestCardHTML(best, brand ? { label: `ყველაზე იაფი ${brand} — ამ მაღაზიებში` } : undefined)
     + (rest.length ? `<h2 class="srch-h">ალტერნატივები <small>— დალაგებულია ${sortNote()}</small></h2>${listHeadHTML()}<ol class="srch-list">${rest.slice(0, 60).map((x, i) => rowHTML(x, i + 1)).join("")}</ol>` : "")
     + (S.similar.length ? `<details class="srch-more"><summary>მსგავსი პროდუქტები — საბავშვო, აქსესუარები და ნაწილობრივი დამთხვევები (${S.similar.length})</summary><ol class="srch-list">${sorted(S.similar).slice(0, 30).map(rowHTML).join("")}</ol></details>` : "")
     + dealsBlock(false);
@@ -90,7 +93,7 @@ async function run() {
   const r = found.status === "fulfilled" ? found.value : { terms: queryTerms(S.q), items: [], similar: [], live: null };
   const allDeals = deals.status === "fulfilled" ? deals.value || [] : [];
   allDeals.forEach(d => dealById.set(String(d.id), d));
-  S.items = r.items; S.similar = r.similar; S.live = r.live;
+  S.items = r.items; S.similar = r.similar; S.live = r.live; S.terms = r.terms;
   S.deals = matchDeals(allDeals, r.terms); S.cats = matchCats();
   const synWords = new Set(Object.values(SYN));
   S.browse = S.cats.length > 0 && r.terms.every(t => synWords.has(t) || S.cats.some(c => norm(c.label).includes(t)));
@@ -102,6 +105,10 @@ async function run() {
 $("#s-form").addEventListener("submit", e => {
   e.preventDefault(); const q = $("#s-q").value.trim(); if (!q) return;
   S.q = q; S.group = null; history.replaceState(null, "", `?q=${encodeURIComponent(q)}`); run();
+});
+$("#s-out").addEventListener("click", e => {
+  const m = e.target.closest(".srch-mchip[data-q]"); if (!m) return;
+  S.q = m.dataset.q; S.group = null; $("#s-q").value = S.q; history.replaceState(null, "", `?q=${encodeURIComponent(S.q)}`); run(); window.scrollTo({ top: 0, behavior: "smooth" });
 });
 $("#s-out").addEventListener("click", e => { const b = e.target.closest("[data-g]"); if (!b) return; S.group = b.dataset.g || null; render(); $("#s-out").scrollIntoView({ block: "start", behavior: "smooth" }); });
 $("#s-sort").addEventListener("change", e => { S.sort = e.target.value; render(); });

@@ -10,7 +10,7 @@ const db = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SE
 const UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36";
 const CORS = { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type", "Access-Control-Allow-Methods": "POST, OPTIONS" };
 const json = (b: unknown, s = 200) => new Response(JSON.stringify(b), { status: s, headers: { ...CORS, "Content-Type": "application/json" } });
-const TTL_MIN = 30, MAX_STORES = 40, PER_STORE = 8;
+const TTL_MIN = 30, MAX_STORES = 40, PER_STORE = 10; // 10 = the most Shopify's predictive search returns per store
 
 async function authorized(req: Request) {
   const secret = req.headers.get("x-radar-secret");

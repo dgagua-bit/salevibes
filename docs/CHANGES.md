@@ -115,3 +115,10 @@
   - the home-page price finder ("09 / ფასების შედარება");
   - the tools page's comparison box.
 - In the home finder and the tools box, a typed product shows the best price in Georgia, then 5 alternatives, with a link to the full results. With the box empty, they still show the cross-country brand examples (KIKO Milano, Speedo).
+- **Brand-only searches** ("new balance", "newbalance"):
+  - Brands typed as one word are split using the brand list from our stores.
+  - Titles always show the brand. Some stores leave it out ("Sneakers T500…"); ALL-CAPS brands are tidied.
+  - A "which model?" picker (9060, 530, 1080v15…) re-runs the search for the exact model.
+  - The price card is labelled "cheapest <brand> in these stores".
+- "1080 V15" and "1080v15" count as the same model.
+- `live-search` asks each store for 10 results (Shopify's maximum), up from 8.
