@@ -18,11 +18,11 @@ const KA = { ა: "a", ბ: "b", გ: "g", დ: "d", ე: "e", ვ: "v", ზ: "z
 // Georgian words people type → what store titles say
 export const SYN = { "ფეხსაცმელი": "shoe", "სნიკერი": "sneaker", "სნიკერები": "sneaker", "სუნამო": "parfum", "ჩანთა": "bag", "საათი": "watch", "სათვალე": "sunglasses", "კაბა": "dress", "ქურთუკი": "jacket", "მაისური": "shirt", "ჯინსი": "jeans", "ქალის": "women", "კაცის": "men", "ბავშვის": "kids", "კრემი": "cream" };
 const BRAND_KA = { "ნაიკი": "nike", "ადიდასი": "adidas", "პუმა": "puma", "გუჩი": "gucci", "პრადა": "prada", "დიორი": "dior", "შანელი": "chanel", "ზარა": "zara", "მანგო": "mango", "ლევისი": "levis", "ნიუ ბალანსი": "new balance", "ბალენსიაგა": "balenciaga", "ვერსაჩე": "versace", "არმანი": "armani", "კელვინ კლაინი": "calvin klein", "ტომი": "tommy", "ლაკოსტი": "lacoste", "სპიდო": "speedo" };
-export const norm = s => String(s || "").toLowerCase().normalize("NFKD").replace(/[̀-ͯ]/g, "").replace(/['’`]/g, "").replace(/[^a-z0-9ა-ჿ]+/g, " ").trim();
+export const norm = s => String(s || "").toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/['’`]/g, "").replace(/[^a-z0-9\u10d0-\u10ff]+/g, " ").trim();
 export function queryTerms(q) {
   let s = norm(q);
   for (const [k, v] of Object.entries(BRAND_KA)) s = s.replace(k, v);
-  return s.split(" ").filter(Boolean).map(t => SYN[t] || (/[ა-ჿ]/.test(t) ? [...t].map(c => KA[c] || c).join("") : t));
+  return s.split(" ").filter(Boolean).map(t => SYN[t] || (/[\u10d0-\u10ff]/.test(t) ? [...t].map(c => KA[c] || c).join("") : t));
 }
 function lev(a, b) {
   if (Math.abs(a.length - b.length) > 2) return 9;
