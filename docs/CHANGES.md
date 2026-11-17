@@ -79,3 +79,16 @@
 
 - ზედა კატეგორიების პანელი იხსნება შესაბამისი ღილაკის ქვეშ (ცენტრის ნაცვლად), უკანა ფონი ბლარდება და გვერდი იკეტება (სქროლი, კლავიატურა, შეხება); სიის ბოლოში სქროლი საიტზე აღარ გადადის; დახურვა რბილია.
 - „04 / პროდუქცია ფასების ისტორიით“ სექცია მთავარი გვერდიდან მოიხსნა (დამატებითი მოთხოვნა `offers`-ზე და პროდუქტის სურათები აღარ იტვირთება). ნაცვლად — „04 / საუკეთესო შეთავაზებები“: ოთხი კატეგორია (ფეხსაცმელი, ჩანთები, ტანსაცმელი, სათვალე), თითოეულში შემთხვევით შერჩეული შეთავაზება, ყველა სხვადასხვა მაღაზიიდან; კანდიდატები მხოლოდ ქულა ≥ 85 და ფასდაკლება ≥ 60% (თუ ასეთი 3-ზე ნაკლებია — კატეგორიის ტოპ-3). კატეგორია განისაზღვრება `deals.category`-თი და აღწერის საკვანძო სიტყვებით (ჩანთა/სათვალე/ფეხსაცმელი რამდენიმე ენაზე). ყოველ 6 წამში ერთი ბარათი იცვლება (ჩერდება მაუსის მიტანისას, ფოკუსზე, როცა სექცია ეკრანს გარეთაა და reduced-motion-ზე); ღილაკი „სხვა შეთავაზებები ⟳“ ოთხივეს ხელახლა არჩევს. წყარო — უკვე ჩატვირთული `deals`, დამატებითი მოთხოვნის გარეშე. `product.html`, `deals.html`, `brands.html` უცვლელია.
+
+## Admin panel and automatic link checks
+- `admin.html` (noindex), for admins only (`is_admin()`; RLS enforces it server-side). It has five tabs:
+  - **Overview:** active deals, deals needing attention, stores, visitors over 7 days, ratings.
+  - **Deals:** add, edit, mark "still valid", end, restore and delete deals. The deal score is calculated automatically.
+  - **Stores:** add and edit stores; turn automatic scanning on or off.
+  - **Automation:** each scheduled job, its last result, and "run now" for link checks and price scans.
+  - **Feedback & visits:** ratings, top pages, referrers and devices over 30 days.
+- New Edge Function `deal-check`, run daily at 03:23 UTC by pg_cron. It opens every active deal's link:
+  - **Link works:** `last_checked` is refreshed.
+  - **Link gone** (404/410, or redirects to the homepage) **twice in a row:** the deal is expired.
+  - **Store blocks bots:** a note only; the deal is flagged for a manual check.
+- In the cabinet's settings, admins see an "ადმინ-პანელი" link. Signing in from `account.html?next=admin.html` goes straight to the panel.

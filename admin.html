@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="ka">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ადმინ-პანელი — Sale Vibes</title>
+<meta name="description" content="Sale Vibes-ის მართვა: აქციები, მაღაზიები, ავტომატური განახლება და მომხმარებლების შეფასებები.">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#FAF8F4">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='16' fill='%23F3E4E6'/%3E%3Ctext x='16' y='22' font-family='Georgia' font-size='18' text-anchor='middle' fill='%238E3B46'%3ES%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://fyfanpmszhopxjaerubd.supabase.co" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Georgian:wght@400;500;600;700&family=Noto+Serif+Georgian:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/main.css">
+<script type="module" src="assets/js/pages/admin.js"></script>
+</head>
+<body>
+<a class="skip" href="#main">გადასვლა მთავარ შიგთავსზე</a>
+<header data-sv-header></header>
+<main id="main">
+<div class="wrap adm">
+  <div class="page-head"><p class="eyebrow">ადმინ-პანელი</p><h1 id="adm-h">მართვა</h1><p id="adm-sub">აქციები, მაღაზიები, ავტომატური განახლება და შეფასებები — ერთ ადგილას.</p></div>
+  <p class="form-status" id="adm-msg" role="status" aria-live="polite"></p>
+  <div id="adm-gate" class="panel" hidden><p id="adm-gate-t"></p><p><a class="btn btn-dark" href="account.html?next=admin.html">შესვლა</a></p></div>
+
+  <div id="adm" hidden>
+    <nav class="seg adm-tabs" role="tablist" aria-label="ადმინის ნაწილები"><button type="button" data-pane="ov" aria-pressed="true">მიმოხილვა</button><button type="button" data-pane="deals" aria-pressed="false">აქციები</button><button type="button" data-pane="stores" aria-pressed="false">მაღაზიები</button><button type="button" data-pane="auto" aria-pressed="false">ავტომატური განახლება</button><button type="button" data-pane="fb" aria-pressed="false">შეფასებები და ვიზიტები</button></nav>
+
+    <section class="adm-pane" id="pane-ov"><div class="adm-cards" id="ov-cards"></div><h2 class="adm-h2">ყურადღება სჭირდება</h2><div id="ov-attn"></div></section>
+
+    <section class="adm-pane" id="pane-deals" hidden>
+      <div class="adm-bar"><button type="button" class="btn btn-dark" id="d-new">+ ახალი აქცია</button>
+        <div class="seg" role="group" aria-label="ფილტრი" id="d-filter"><button type="button" data-f="active" aria-pressed="true">აქტიური</button><button type="button" data-f="attn" aria-pressed="false">ყურადღება სჭირდება</button><button type="button" data-f="expired" aria-pressed="false">დასრულებული</button><button type="button" data-f="draft" aria-pressed="false">დრაფტი</button></div>
+        <label class="adm-search"><span class="sr-only">ძიება</span><input id="d-q" type="search" placeholder="მაღაზია ან სათაური…"></label></div>
+      <form class="panel adm-form" id="d-form" hidden novalidate>
+        <h2 class="adm-h2" id="d-form-h">ახალი აქცია</h2><input type="hidden" id="d-id">
+        <div class="fields">
+          <label class="field">მაღაზია<select id="d-store" required></select></label>
+          <label class="field">სტატუსი<select id="d-status"><option value="active">აქტიური — ჩანს საიტზე</option><option value="draft">დრაფტი — არ ჩანს</option><option value="expired">დასრულებული</option></select></label>
+          <label class="field full">სათაური <span class="hint">(მაგ. Sale: −50%-მდე)</span><input id="d-title" required maxlength="200"></label>
+          <label class="field full">აღწერა <span class="hint">(რა არის ფასდაკლებით, პირობები)</span><textarea id="d-desc" rows="3" maxlength="600"></textarea></label>
+          <label class="field full">აქციის ბმული<input id="d-url" type="url" required placeholder="https://…" maxlength="1000"></label>
+          <label class="field">ფასდაკლება %-მდე<input id="d-disc" type="number" min="0" max="100" step="1" inputmode="numeric"></label>
+          <label class="field">პრომოკოდი <span class="hint">(თუ აქვს)</span><input id="d-code" maxlength="40"></label>
+          <label class="field">მთავრდება <span class="hint">(თუ ცნობილია)</span><input id="d-end" type="date"></label>
+          <label class="field">კატეგორია<select id="d-cat"></select></label>
+          <label class="field">ქვეყანა<select id="d-country"></select></label>
+          <label class="check full"><input type="checkbox" id="d-bf"> შავი პარასკევის აქცია</label>
+        </div>
+        <p class="fine" id="d-score-note"></p>
+        <p class="adm-actions"><button class="btn btn-dark" type="submit">შენახვა</button> <button class="btn btn-ghost" type="button" id="d-cancel">გაუქმება</button></p>
+      </form>
+      <div id="d-list"></div>
+    </section>
+
+    <section class="adm-pane" id="pane-stores" hidden>
+      <div class="adm-bar"><button type="button" class="btn btn-dark" id="s-new">+ ახალი მაღაზია</button><label class="adm-search"><span class="sr-only">ძიება</span><input id="s-q" type="search" placeholder="მაღაზია, ქვეყანა, ბრენდი…"></label></div>
+      <form class="panel adm-form" id="s-form" hidden novalidate>
+        <h2 class="adm-h2" id="s-form-h">ახალი მაღაზია</h2><input type="hidden" id="s-id">
+        <div class="fields">
+          <label class="field">სახელი<input id="s-name" required maxlength="80"></label>
+          <label class="field">საიტი<input id="s-url" type="url" required placeholder="https://…" maxlength="300"></label>
+          <label class="field">ქვეყანა<select id="s-country"></select></label>
+          <label class="field">ვალუტა<select id="s-cur"><option>EUR</option><option>GBP</option><option>USD</option></select></label>
+          <label class="field">კატეგორია<select id="s-cat"></select></label>
+          <div class="field">რომელ განყოფილებაში ჩანს<div class="chips" id="s-worlds"></div></div>
+          <label class="field full">ბრენდები <span class="hint">(მძიმით გამოყოფილი)</span><input id="s-brands" maxlength="1000"></label>
+          <label class="check full"><input type="checkbox" id="s-active"> პროდუქტების ფასების ავტომატური სკანირება <span class="hint">(მუშაობს მხოლოდ საიტებზე, რომლებიც სკანერს არ ბლოკავს)</span></label>
+        </div>
+        <p class="adm-actions"><button class="btn btn-dark" type="submit">შენახვა</button> <button class="btn btn-ghost" type="button" id="s-cancel">გაუქმება</button></p>
+      </form>
+      <div id="s-list"></div>
+    </section>
+
+    <section class="adm-pane" id="pane-auto" hidden><p class="fine">ეს ყველაფერი თავისით მუშაობს — არაფრის გაკეთება არ გჭირდება. აქ ჩანს, ბოლოს როდის გაეშვა და რა შედეგით.</p><div id="auto-list"></div></section>
+
+    <section class="adm-pane" id="pane-fb" hidden><div class="adm-cards" id="fb-cards"></div><div class="int-cols"><div><h2 class="adm-h2">ბოლო შეფასებები</h2><div id="fb-list"></div></div><div><h2 class="adm-h2">ვიზიტები — ბოლო 30 დღე</h2><div id="pv-list"></div></div></div></section>
+  </div>
+</div>
+</main>
+<footer data-sv-footer></footer>
+<noscript><p class="wrap notice">SaleVibes-ის მონაცემების საჩვენებლად საჭიროა JavaScript.</p></noscript>
+</body>
+</html>

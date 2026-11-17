@@ -631,3 +631,25 @@ select:hover, input:hover { border-color: var(--ink); }
   .sv-tools select { min-width: 0; }
   .sv-grid { grid-template-columns: 1fr; }
 }
+
+/* ---------- admin panel ---------- */
+.adm-tabs { flex-wrap: wrap; margin: 6px 0 26px; }
+.adm-pane { animation: none; }
+.adm-h2 { font-family: var(--serif, serif); font-size: 1.35rem; font-weight: 500; margin: 30px 0 12px; }
+.adm-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; }
+.adm-card { border: 1px solid var(--line, #ddd6ca); padding: 16px 18px; background: var(--paper, #fff); display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.adm-card span { font-size: .78rem; color: var(--muted, #6b655c); text-transform: none; }
+.adm-card b { font-size: 1.9rem; font-weight: 500; line-height: 1.1; }
+.adm-card small { color: var(--muted, #6b655c); font-size: .78rem; }
+.adm-card.warn { border-color: #b4532a; } .adm-card.warn b { color: #b4532a; }
+.adm-bar { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 16px; }
+.adm-search { flex: 1 1 220px; } .adm-search input { width: 100%; }
+.adm-form { margin: 0 0 22px; } .adm-form .fields { margin-top: 8px; }
+.adm-actions { margin-top: 16px; display: flex; gap: 10px; flex-wrap: wrap; }
+.adm-table td { vertical-align: top; } .adm-table small { line-height: 1.45; }
+.adm-row-actions { white-space: nowrap; } .adm-row-actions .btn { padding: 6px 10px; font-size: .78rem; margin: 0 4px 4px 0; }
+.adm-row-actions .confirm { background: #b4532a; color: #fff; border-color: #b4532a; }
+.adm-logo { width: 28px; height: 28px; object-fit: contain; vertical-align: middle; margin-right: 8px; background: #fff; }
+.adm-job { display: flex; justify-content: space-between; gap: 18px; align-items: flex-start; border-top: 1px solid var(--line, #ddd6ca); padding: 18px 0; }
+.adm-job b { display: block; font-size: 1.02rem; } .adm-job small { color: var(--muted, #6b655c); } .adm-job p { margin: 6px 0 0; max-width: 70ch; }
+@media (max-width: 720px) { .adm-job { flex-direction: column; } .adm-row-actions { white-space: normal; } }

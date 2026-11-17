@@ -33,7 +33,7 @@ async function busy(form, fn) {
 $("#f-in").addEventListener("submit", e => { e.preventDefault(); busy(e.target, async () => {
   const em = $("#in-email").value.trim().toLowerCase(), pw = $("#in-pass").value;
   if (!emailOk(em) || pw.length < 8) throw new Error("ჩაწერე სწორი ელფოსტა და პაროლი (მინიმუმ 8 სიმბოლო).");
-  await A.signIn(em, pw); say(""); await showCabinet();
+  await A.signIn(em, pw); say(""); if (params.get("next") === "admin.html") { location.href = "admin.html"; return; } await showCabinet();
 }); });
 $("#f-up").addEventListener("submit", e => { e.preventDefault(); busy(e.target, async () => {
   const em = $("#up-email").value.trim().toLowerCase(), pw = $("#up-pass").value;
@@ -235,6 +235,7 @@ $("#f-link").addEventListener("submit", e => { e.preventDefault(); const st = $(
 /* ---- settings ---- */
 async function renderSettings() {
   try { const p = await A.getProfile(); $("#set-alerts").checked = !!p.email_alerts; } catch { /* default */ }
+  A.supa.rpc("is_admin").then(({ data }) => { if (data) $("#admin-link").hidden = false; }, () => {});
   $("#alerts-note").textContent = EMAIL_ALERTS_LIVE ? "ყოველ წერილში იქნება გამოწერის გაუქმების ბმული." : "ელფოსტით გაგზავნა ჯერ არ არის ჩართული — სამიზნეს მიღწევა ამ დროისთვის კაბინეტში ჩანს.";
 }
 $("#set-alerts").addEventListener("change", async e => { try { await A.updateProfile({ email_alerts: e.target.checked }); toast("შენახულია"); } catch (err) { toast(err.message); e.target.checked = !e.target.checked; } });
