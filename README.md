@@ -6,6 +6,10 @@ SaleVibes არ ყიდის პროდუქტს. ის აჩვე�
 
 ვებსაიტი: https://dgagua-bit.github.io/salevibes/
 
+## Georgia Guide (`guide/`)
+
+ცალკე ვებ-აპლიკაცია — ტურისტული გიდი საქართველოსთვის (აეროპორტი → სასტუმრო, მარშრუტები, ადგილები, გასაჩერებლები და რესტორნები, ქართული სამზარეულო; EN/KA/RU; PWA, QR პოსტერი). იხ. [`guide/README.md`](guide/README.md). მისამართი: https://dgagua-bit.github.io/salevibes/guide/
+
 ## სტრუქტურა
 
 სტატიკური საიტი GitHub Pages-ზე, build-ის გარეშე (ES modules). მონაცემები — Supabase (REST, publishable key + RLS).
