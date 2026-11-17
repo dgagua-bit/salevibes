@@ -243,7 +243,7 @@ async function run() {
   S.items = scored.filter(x => x.rel === 1 && !secondary(x.title, S.q));
   S.similar = scored.filter(x => (x.rel === 1 && secondary(x.title, S.q)) || (terms.length > 1 && x.rel < 1 && x.rel >= 0.5));
   S.live = live.status === "fulfilled" ? live.value : null;
-  $("#s-src").textContent = S.live ? `ძიება ${S.live.stores_answered} მაღაზიის საიტზე ახლავე + ჩვენი კატალოგი. ფასები: ${new Date(S.live.at).toLocaleTimeString("ka-GE", { hour: "2-digit", minute: "2-digit" })}.` : "მაღაზიების პირდაპირი ძიება ახლა მიუწვდომელია — ნაჩვენებია მხოლოდ ჩვენი კატალოგი.";
+  $("#s-src").textContent = S.live ? `ძიება ${S.live.stores_answered} მაღაზიის საიტზე ახლავე + ჩვენი კატალოგი. ფასები: ${new Date(S.live.at).toLocaleTimeString("ka-GE", { hour: "2-digit", minute: "2-digit", hourCycle: "h23" })}.` : "მაღაზიების პირდაპირი ძიება ახლა მიუწვდომელია — ნაჩვენებია მხოლოდ ჩვენი კატალოგი.";
   elsewhere(stores.status === "fulfilled" ? stores.value : []);
   render();
 }
