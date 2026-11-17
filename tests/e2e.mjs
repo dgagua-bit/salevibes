@@ -112,6 +112,17 @@ check("tools: volumetric weight used", (await page.textContent("#calc-out")).inc
 await page.waitForSelector("#cmp-out:not([hidden]), #cmp-status:not(:empty)");
 check("tools: cross-country comparison loads", await page.locator("#cmp-out table tbody tr").count() > 0);
 
+// product search: the home-page price finder and the search page show the best price first
+await page.goto(BASE + "index.html", { waitUntil: "networkidle" });
+await page.fill("#finder-query", "speedo goggles"); await page.click("#finder-submit");
+await page.waitForSelector("#finder-results .srch-best, #finder-status a", { timeout: 45000 });
+check("home: product finder shows a best price", await page.locator("#finder-results .srch-best").count() === 1);
+check("home: product finder lists alternatives", await page.locator("#finder-results .srch-row").count() > 0);
+await page.goto(BASE + "search.html?q=speedo%20goggles", { waitUntil: "domcontentloaded" });
+await page.waitForSelector(".srch-best, .empty, .empty-state", { timeout: 45000 });
+check("search: best price card first", await page.locator("#s-out > .srch-best, #s-out > .srch-variants + .srch-best").count() === 1);
+check("search: prices shown in GEL", /₾/.test(await page.textContent(".srch-best .srch-price")));
+
 // keyboard: skip link + focus visible
 await page.goto(BASE + "index.html", { waitUntil: "networkidle" });
 await page.keyboard.press("Tab");

@@ -110,3 +110,8 @@
 - **Store sales and categories that match the query are shown too.** A bare category word ("ფეხსაცმელი") opens with the category link and its sales.
 - **Stores without a public search** get one-click links to search them on Google.
 - **The admin panel shows searches over 30 days:** what people search for, and which searches found nothing.
+- The search engine now lives in `assets/js/search-engine.js` and has its own styles (`SEARCH_CSS`). Three places use it:
+  - the search page;
+  - the home-page price finder ("09 / ფასების შედარება");
+  - the tools page's comparison box.
+- In the home finder and the tools box, a typed product shows the best price in Georgia, then 5 alternatives, with a link to the full results. With the box empty, they still show the cross-country brand examples (KIKO Milano, Speedo).

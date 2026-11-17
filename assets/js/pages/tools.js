@@ -1,7 +1,8 @@
 import { mountChrome, breakdown, fxLine, errorState, $ } from "../ui.js";
 import { getFx, searchCompare, priceSearch, sb } from "../api.js";
 import { compareItem, compareCard, COMPARE_CSS } from "../compare.js";
-document.head.insertAdjacentHTML("beforeend", `<style>${COMPARE_CSS}</style>`);
+import { findProducts, groupItems, sortItems, pickBest, storeCount, bestCardHTML, rowHTML, SEARCH_CSS } from "../search-engine.js";
+document.head.insertAdjacentHTML("beforeend", `<style>${COMPARE_CSS}${SEARCH_CSS}</style>`);
 import { landedCost, carrierRate, toGel } from "../pricing.js";
 import { CARRIERS, CUSTOMS, COUNTRIES, CATEGORIES, PRICE_SEARCH_API, ESTIMATE_DEFAULTS } from "../config.js";
 import { esc, safeUrl, money, gelText, dateKa, countryName, flag, catLabel } from "../format.js";
@@ -62,22 +63,41 @@ $("#customs-box").innerHTML = `<p><span class="status ${CUSTOMS.status === "VERI
 let CMP_BRAND = "";
 async function compare(q) {
   const st = $("#cmp-status"), out = $("#cmp-out");
-  st.textContent = "ვეძებ…";
+  if (q) return findBest(CMP_BRAND && !q.toLowerCase().includes(CMP_BRAND.toLowerCase()) ? `${CMP_BRAND} ${q}` : q);
+  st.textContent = "იტვირთება…";
   try {
-    const rows = await searchCompare(q, CMP_BRAND);
+    const rows = await searchCompare("", CMP_BRAND);
     const items = rows.filter(it => (it.compare_prices || []).filter(p => Number(p.price) > 0).length > 1)
       .map(it => ({ it, c: compareItem(it, FXR.fx) })).sort((a, b) => (b.c.saving || 0) - (a.c.saving || 0));
-    if (!items.length) { st.textContent = q ? "ამ ძიებით რამდენიმე ქვეყანაში ნაპოვნი პროდუქტი არ გვაქვს." : "შესადარებელი მონაცემი ჯერ არ არის."; out.hidden = true; return; }
-    st.textContent = `${items.length} პროდუქტი რამდენიმე ქვეყანაში · დალაგებულია დანაზოგის მიხედვით · ფასები ოფიციალური საიტებიდან, ლარში — ეროვნული ბანკის კურსით`;
+    if (!items.length) { st.textContent = "შესადარებელი მონაცემი ჯერ არ არის."; out.hidden = true; return; }
+    st.textContent = `მაგალითები: ${items.length} პროდუქტი რამდენიმე ქვეყანაში · დალაგებულია დანაზოგის მიხედვით · ფასები ოფიციალური საიტებიდან, ლარში — ეროვნული ბანკის კურსით`;
     out.className = "cmp-list"; out.innerHTML = items.slice(0, 12).map(x => compareCard(x.it, FXR.fx)).join(""); out.hidden = false;
   } catch (e) { console.error(e); st.textContent = ""; out.innerHTML = errorState("შედარების მონაცემები ვერ ჩაიტვირთა."); out.hidden = false; }
+}
+/** A typed product → the shared search engine: best price in Georgia first, then alternatives. */
+async function findBest(q) {
+  const st = $("#cmp-status"), out = $("#cmp-out"), full = `search.html?q=${encodeURIComponent(q)}`;
+  out.className = ""; out.innerHTML = ""; out.hidden = true;
+  st.innerHTML = `<span class="spin" aria-hidden="true"></span> ვეძებთ „${esc(q)}“ მაღაზიებში… (რამდენიმე წამი)`;
+  try {
+    const r = await findProducts(q, { fx: FXR.fx });
+    const list = sortItems(r.items);
+    if (!list.length) { st.innerHTML = `„${esc(q)}“ ზუსტად ვერ ვიპოვეთ ჩვენს მაღაზიებში. <a class="srch-link" href="${full}">სრული ძიება — აქციები და სხვა მაღაზიები →</a>`; return; }
+    groupItems(list);
+    const best = pickBest(list), rest = list.filter(x => x !== best);
+    st.textContent = `${list.length} შეთავაზება ${storeCount(list)} მაღაზიაში · ზემოთ — საუკეთესო ფასი საქართველოში მიტანით, ქვემოთ — ალტერნატივები`;
+    out.innerHTML = bestCardHTML(best)
+      + (rest.length ? `<h3 class="srch-h">ალტერნატივები <small>— დალაგებულია საქართველოში ჯამური ფასით</small></h3><ol class="srch-list">${rest.slice(0, 5).map((x, i) => rowHTML(x, i + 1)).join("")}</ol>` : "")
+      + `<p class="srch-actions"><a class="srch-btn ghost" href="${full}">ყველა შედეგი და ვარიანტები (${list.length}) →</a></p>`;
+    out.hidden = false;
+  } catch (e) { console.error(e); st.textContent = "ძიება ახლა ვერ შესრულდა. სცადე მოგვიანებით."; }
 }
 async function initBrands() {
   try {
     const b = await sb("compare_items?select=brand&order=brand.asc&limit=1000");
     const brands = [...new Set(b.map(x => x.brand))];
     $("#cmp-brands").innerHTML = `<button type="button" data-brand="" aria-pressed="true">ყველა ბრენდი</button>` + brands.map(n => `<button type="button" data-brand="${esc(n)}" aria-pressed="false">${esc(n)}</button>`).join("");
-    $("#cmp-sub").textContent = `შედარებაში: ${brands.join(", ")}. Adidas-ისა და Nike-ს საიტები ავტომატურ შემოწმებას ბლოკავს — მათ ოფიციალური პარტნიორული ფიდით დავამატებთ.`;
+    $("#cmp-sub").textContent = `ჩაწერე პროდუქტი — მაღაზიების საიტებზე ახლავე მოვძებნით და გაჩვენებთ საუკეთესო ფასს საქართველოში. ცარიელი ველით ჩანს ერთი და იგივე პროდუქტი ბრენდის სხვადასხვა ქვეყნის საიტზე (${brands.join(", ")}).`;
   } catch { /* chips stay default */ }
 }
 $("#cmp-form").addEventListener("submit", e => { e.preventDefault(); compare($("#cmp-q").value.trim()); });
