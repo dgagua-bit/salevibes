@@ -1,7 +1,7 @@
 import { mountChrome, breakdown, fxLine, errorState, $ } from "../ui.js";
 import { getFx, searchCompare, priceSearch, sb } from "../api.js";
 import { compareItem, compareCard, COMPARE_CSS } from "../compare.js";
-import { findProducts, groupItems, sortItems, pickBest, storeCount, bestCardHTML, rowHTML, brandOf, modelsOf, modelChipsHTML, SEARCH_CSS } from "../search-engine.js";
+import { findProducts, groupItems, sortItems, pickBest, storeCount, bestCardHTML, rowHTML, brandOf, modelsOf, modelChipsHTML, closestHTML, liveNote, SEARCH_CSS } from "../search-engine.js";
 document.head.insertAdjacentHTML("beforeend", `<style>${COMPARE_CSS}${SEARCH_CSS}</style>`);
 import { landedCost, carrierRate, toGel } from "../pricing.js";
 import { CARRIERS, CUSTOMS, COUNTRIES, CATEGORIES, PRICE_SEARCH_API, ESTIMATE_DEFAULTS } from "../config.js";
@@ -82,10 +82,15 @@ async function findBest(q) {
   try {
     const r = await findProducts(q, { fx: FXR.fx });
     const list = sortItems(r.items);
-    if (!list.length) { st.innerHTML = `„${esc(q)}“ ზუსტად ვერ ვიპოვეთ ჩვენს მაღაზიებში. <a class="srch-link" href="${full}">სრული ძიება — აქციები და სხვა მაღაზიები →</a>`; return; }
+    if (!list.length) {
+      const near = closestHTML(r.close || [], q, 5);
+      st.innerHTML = (near ? "ზუსტი დამთხვევა არ არის — ქვემოთ ყველაზე ახლოს მყოფი შედეგებია." : `„${esc(q)}“ ჩვენს მაღაზიებში ვერ ვიპოვეთ.`) + esc(liveNote(r.live)) + ` <a class="srch-link" href="${full}">სრული ძიება — აქციები და სხვა მაღაზიები →</a>`;
+      if (near) { out.innerHTML = near; out.hidden = false; }
+      return;
+    }
     groupItems(list);
     const best = pickBest(list), rest = list.filter(x => x !== best), brand = brandOf(list, r.terms), models = brand ? modelsOf(list, brand) : [];
-    st.textContent = `${list.length} შეთავაზება ${storeCount(list)} მაღაზიაში · ზემოთ — საუკეთესო ფასი საქართველოში მიტანით, ქვემოთ — ალტერნატივები`;
+    st.textContent = `${list.length} შეთავაზება ${storeCount(list)} მაღაზიაში · ზემოთ — საუკეთესო ფასი საქართველოში მიტანით, ქვემოთ — ალტერნატივები.` + liveNote(r.live);
     out.innerHTML = modelChipsHTML(models, q, brand) + bestCardHTML(best, brand ? { label: `ყველაზე იაფი ${brand} — ამ მაღაზიებში` } : undefined)
       + (rest.length ? `<h3 class="srch-h">ალტერნატივები <small>— დალაგებულია საქართველოში ჯამური ფასით</small></h3><ol class="srch-list">${rest.slice(0, 5).map((x, i) => rowHTML(x, i + 1)).join("")}</ol>` : "")
       + `<p class="srch-actions"><a class="srch-btn ghost" href="${full}">ყველა შედეგი და ვარიანტები (${list.length}) →</a></p>`;

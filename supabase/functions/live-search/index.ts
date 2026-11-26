@@ -1,8 +1,10 @@
 // live-search — finds a specific product on store websites right now, with real prices.
 // Public:  POST { q }                 -> { items: [...], stores_searched, cached }
 // Admin:   POST { task: "detect" }    -> marks which stores expose Shopify's public product search
-// Only public storefront endpoints are used (/search/suggest.json, /cart.js). Results are cached 30 min;
-// fresh searches are capped at 40 per minute in total. Every query is logged (text + result count only) for the admin panel.
+// Only public storefront endpoints are used (/search/suggest.json, /cart.js). Complete answers are cached 30 min;
+// answers where stores did not respond (rate limits, outages) only 2 min, so a bad moment is never served for long.
+// A store that answers 429/5xx/timeout is retried once. Each store's currency is remembered in the stores table.
+// Fresh searches are capped at 40 per minute in total. Every query is logged (text + result count only) for the admin panel.
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
 
@@ -30,6 +32,16 @@ async function getJson(url: string, ms = 7000) {
   if (!/^\s*[{\[]/.test(t)) throw new Error("not json");
   return JSON.parse(t);
 }
+/** One retry after a short pause for answers that are usually temporary (rate limit, server error, timeout). */
+async function getJsonRetry(url: string, ms = 6000) {
+  try { return await getJson(url, ms); }
+  catch (e) {
+    const m = String((e as Error).message);
+    if (!/HTTP (429|5\d\d)|timed? ?out|aborted/i.test(m)) throw e;
+    await new Promise((r) => setTimeout(r, 900));
+    return await getJson(url, ms);
+  }
+}
 
 function bases(baseUrl: string) {
   const u = new URL(baseUrl);
@@ -49,23 +61,24 @@ async function detect(s: any) {
 
 function num(v: unknown) { const n = Number(String(v ?? "").replace(",", ".")); return Number.isFinite(n) && n > 0 ? n : null; }
 
-// Shopify answers in the currency of the visitor's location, so ask each store which one it uses (cached 6 h).
-const curCache = new Map<string, { c: string; t: number }>();
-async function storeCurrency(origin: string) {
-  const hit = curCache.get(origin);
-  if (hit && Date.now() - hit.t < 6 * 3600_000) return hit.c;
-  const cart = await getJson(`${origin}/cart.js`, 6000).catch(() => null);
-  const c = /^[A-Z]{3}$/.test(cart?.currency || "") ? cart.currency : null;
-  if (c) curCache.set(origin, { c, t: Date.now() });
+// Shopify answers in the currency of the visitor's location (our servers' location), so ask each store which one it uses.
+// Remembered in stores.search_currency and refreshed weekly — one request less per store per search.
+const WEEK = 7 * 86400_000;
+async function storeCurrency(s: any) {
+  if (s.search_currency && s.search_currency_at && Date.now() - new Date(s.search_currency_at).getTime() < WEEK) return s.search_currency;
+  const cart = await getJsonRetry(`${new URL(s.search_base).origin}/cart.js`, 6000).catch(() => null);
+  const c = /^[A-Z]{3}$/.test(cart?.currency || "") ? cart.currency : (s.search_currency || null);
+  if (c && c !== s.search_currency) await db.from("stores").update({ search_currency: c, search_currency_at: new Date().toISOString() }).eq("slug", s.slug);
+  else if (c) await db.from("stores").update({ search_currency_at: new Date().toISOString() }).eq("slug", s.slug);
   return c;
 }
 
 async function searchStore(s: any, q: string) {
   const [d, currency] = await Promise.all([
-    getJson(`${s.search_base}/search/suggest.json?q=${encodeURIComponent(q)}&resources[type]=product&resources[limit]=${PER_STORE}&resources[options][unavailable_products]=last`, 6000),
-    storeCurrency(new URL(s.search_base).origin)
+    getJsonRetry(`${s.search_base}/search/suggest.json?q=${encodeURIComponent(q)}&resources[type]=product&resources[limit]=${PER_STORE}&resources[options][unavailable_products]=last`, 6000),
+    storeCurrency(s)
   ]);
-  if (!currency) return [];
+  if (!currency) throw new Error("currency unknown");
   const origin = new URL(s.search_base).origin;
   return (d?.resources?.results?.products || []).map((p: any) => {
     const price = num(p.price) ?? num(p.price_min);
@@ -100,21 +113,26 @@ Deno.serve(async (req) => {
   const key = q.toLowerCase();
   const { data: hit } = await db.from("search_cache").select("payload,created_at").eq("key", key).maybeSingle();
   if (hit && Date.now() - new Date(hit.created_at).getTime() < TTL_MIN * 60_000) {
-    await db.from("search_log").insert({ q, results: (hit.payload as any)?.items?.length ?? 0, cached: true });
+    if (!body.test) await db.from("search_log").insert({ q, results: (hit.payload as any)?.items?.length ?? 0, cached: true });
     return json({ ...hit.payload, cached: true });
   }
   // protect the stores and our quota: at most 40 fresh (uncached) searches per minute in total
   const { count } = await db.from("search_log").select("id", { count: "exact", head: true }).eq("cached", false).gte("created_at", new Date(Date.now() - 60_000).toISOString());
   if ((count ?? 0) >= 40) return json({ error: "busy" }, 429);
 
-  const { data: stores } = await db.from("stores").select("name,slug,country,currency,search_base,brands,sort_order").eq("platform", "shopify").not("search_base", "is", null);
+  const { data: stores } = await db.from("stores").select("name,slug,country,currency,search_base,search_currency,search_currency_at,brands,sort_order").eq("platform", "shopify").not("search_base", "is", null);
   const terms = key.split(" ");
   const ranked = (stores || []).map(s => ({ s, w: (s.brands || []).some((b: string) => terms.some(t => b.toLowerCase().includes(t) && t.length > 2)) ? 0 : 1 }))
     .sort((a, b) => a.w - b.w || (a.s.sort_order ?? 999) - (b.s.sort_order ?? 999)).slice(0, MAX_STORES).map(x => x.s);
   const results = await Promise.allSettled(ranked.map(s => searchStore(s, q)));
   const items = results.flatMap(r => r.status === "fulfilled" ? r.value : []);
-  const payload = { q, items, stores_searched: ranked.length, stores_answered: results.filter(r => r.status === "fulfilled").length, at: new Date().toISOString() };
-  await db.from("search_cache").upsert({ key, payload, created_at: new Date().toISOString() });
-  await db.from("search_log").insert({ q, results: items.length, cached: false });
+  const answered = results.filter(r => r.status === "fulfilled").length;
+  const partial = answered < Math.ceil(ranked.length * 0.7);
+  const payload = { q, items, stores_searched: ranked.length, stores_answered: answered, partial, at: new Date().toISOString() };
+  // a partial answer (stores busy) is kept only ~2 minutes, a complete one 30 minutes
+  const createdAt = partial ? new Date(Date.now() - (TTL_MIN - 2) * 60_000) : new Date();
+  await db.from("search_cache").upsert({ key, payload, created_at: createdAt.toISOString() });
+  // test runs (local copies of the site) are not counted in the admin panel's search statistics
+  if (!body.test) await db.from("search_log").insert({ q, results: items.length, cached: false });
   return json({ ...payload, cached: false });
 });

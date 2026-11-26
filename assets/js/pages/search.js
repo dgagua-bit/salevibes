@@ -6,12 +6,12 @@ import { mountChrome, $, emptyState, dealCard, bindCardActions } from "../ui.js"
 import { esc, flag, countryName, hostOf, catLabel } from "../format.js";
 import { getStores, getDeals } from "../api.js";
 import { CATEGORIES } from "../config.js";
-import { SYN, norm, queryTerms, findProducts, groupItems, sortItems, pickBest, storeCount, bestCardHTML, rowHTML, listHeadHTML, brandOf, modelsOf, modelChipsHTML, SEARCH_CSS } from "../search-engine.js";
+import { SYN, norm, queryTerms, findProducts, groupItems, sortItems, pickBest, storeCount, bestCardHTML, rowHTML, listHeadHTML, brandOf, modelsOf, modelChipsHTML, closestHTML, liveNote, SEARCH_CSS } from "../search-engine.js";
 
 mountChrome("search");
 document.head.insertAdjacentHTML("beforeend", `<style>${SEARCH_CSS}</style>`);
 const params = new URLSearchParams(location.search);
-const S = { q: (params.get("q") || "").trim(), sort: "landed", stock: true, items: [], similar: [], live: null, group: null, deals: [], cats: [], browse: false, terms: [] };
+const S = { q: (params.get("q") || "").trim(), sort: "landed", stock: true, items: [], similar: [], live: null, group: null, deals: [], cats: [], browse: false, terms: [], close: [] };
 const dealById = new Map();
 bindCardActions(null, id => dealById.get(String(id)));
 const sorted = list => sortItems(list, S);
@@ -45,9 +45,10 @@ function render() {
   $("#s-count").textContent = [S.items.length ? `${S.items.length} პროდუქტი · ${storeCount(S.items)} მაღაზია` : "", S.deals.length ? `${S.deals.length} აქცია` : ""].filter(Boolean).join(" · ");
   $("#s-elsewhere").hidden = false;
   if (!list.length) {
-    out.innerHTML = catBlock()
-      + (S.deals.length ? dealsBlock(true) : emptyState(S.items.length ? "მარაგში ვერ ვიპოვეთ — მოხსენი „მხოლოდ მარაგში“." : `„${esc(S.q)}“ ჩვენს მაღაზიებში ვერ ვიპოვეთ. სცადე უფრო მოკლედ (მაგ. მხოლოდ ბრენდი და მოდელი) ან ინგლისურად.`))
-      + (S.similar.length ? `<h2 class="srch-h">შეიძლება ეძებდი</h2><ol class="srch-list">${sorted(S.similar).slice(0, 12).map(rowHTML).join("")}</ol>` : "");
+    const close = S.items.length ? "" : closestHTML(S.close, S.q, 12);
+    out.innerHTML = catBlock() + close
+      + (S.deals.length ? dealsBlock(true) : close ? "" : emptyState(S.items.length ? "მარაგში ვერ ვიპოვეთ — მოხსენი „მხოლოდ მარაგში“." : `„${esc(S.q)}“ ჩვენს მაღაზიებში ვერ ვიპოვეთ. სცადე უფრო მოკლედ (მაგ. მხოლოდ ბრენდი და მოდელი) ან ინგლისურად.`))
+      + (!close && S.similar.length ? `<h2 class="srch-h">შეიძლება ეძებდი</h2><ol class="srch-list">${sorted(S.similar).slice(0, 12).map(rowHTML).join("")}</ol>` : "");
     return;
   }
   if (S.browse) { // a bare category word: the category and its sales first, then products — no single "best" product
@@ -69,7 +70,7 @@ function render() {
       ${multi.map(g => `<button type="button" class="chip" data-g="${esc(g.key)}" aria-pressed="${S.group === g.key}">${esc(g.label.length > 44 ? g.label.slice(0, 42) + "…" : g.label)} <b>${g.stores > 1 ? g.stores + " მაღაზია" : g.items.length}</b></button>`).join("")}</div></div>` : "";
   out.innerHTML = catBlock() + chips + bestCardHTML(best, brand ? { label: `ყველაზე იაფი ${brand} — ამ მაღაზიებში` } : undefined)
     + (rest.length ? `<h2 class="srch-h">ალტერნატივები <small>— დალაგებულია ${sortNote()}</small></h2>${listHeadHTML()}<ol class="srch-list">${rest.slice(0, 60).map((x, i) => rowHTML(x, i + 1)).join("")}</ol>` : "")
-    + (S.similar.length ? `<details class="srch-more"><summary>მსგავსი პროდუქტები — საბავშვო, აქსესუარები და ნაწილობრივი დამთხვევები (${S.similar.length})</summary><ol class="srch-list">${sorted(S.similar).slice(0, 30).map(rowHTML).join("")}</ol></details>` : "")
+    + (S.similar.length ? `<details class="srch-more"><summary>მსგავსი — სხვა ბრენდები, საბავშვო, აქსესუარები, ნაკრებები და ნაწილობრივი დამთხვევები (${S.similar.length})</summary><ol class="srch-list">${sorted(S.similar).slice(0, 30).map(rowHTML).join("")}</ol></details>` : "")
     + dealsBlock(false);
 }
 
@@ -93,11 +94,11 @@ async function run() {
   const r = found.status === "fulfilled" ? found.value : { terms: queryTerms(S.q), items: [], similar: [], live: null };
   const allDeals = deals.status === "fulfilled" ? deals.value || [] : [];
   allDeals.forEach(d => dealById.set(String(d.id), d));
-  S.items = r.items; S.similar = r.similar; S.live = r.live; S.terms = r.terms;
+  S.items = r.items; S.similar = r.similar; S.close = r.close || []; S.live = r.live; S.terms = r.terms;
   S.deals = matchDeals(allDeals, r.terms); S.cats = matchCats();
   const synWords = new Set(Object.values(SYN));
   S.browse = S.cats.length > 0 && r.terms.every(t => synWords.has(t) || S.cats.some(c => norm(c.label).includes(t)));
-  $("#s-src").textContent = S.live ? `ძიება ${S.live.stores_answered} მაღაზიის საიტზე ახლავე + ჩვენი კატალოგი. ფასები: ${new Date(S.live.at).toLocaleTimeString("ka-GE", { hour: "2-digit", minute: "2-digit", hourCycle: "h23" })}.` : "მაღაზიების პირდაპირი ძიება ახლა მიუწვდომელია — ნაჩვენებია მხოლოდ ჩვენი კატალოგი.";
+  $("#s-src").textContent = (S.live ? `ძიება ${S.live.stores_answered} მაღაზიის საიტზე ახლავე + ჩვენი კატალოგი. ფასები: ${new Date(S.live.at).toLocaleTimeString("ka-GE", { hour: "2-digit", minute: "2-digit", hourCycle: "h23" })}.` : "") + liveNote(S.live);
   elsewhere(stores.status === "fulfilled" ? stores.value : []);
   render();
 }

@@ -50,3 +50,11 @@ node tests/e2e.mjs http://localhost:8765/
 - გარე ფასების ძიება: `PRICE_SEARCH_API` — მხოლოდ რეალურად განთავსებული endpoint-ით.
 
 დეტალები: [`docs/CHANGES.md`](docs/CHANGES.md), [`docs/DATA_PIPELINE.md`](docs/DATA_PIPELINE.md).
+
+
+## Releasing
+1. `npm test` (unit tests) and `node tests/e2e.mjs` with the site served locally (`python3 -m http.server 8765`).
+2. `python3 tools/stamp.py` — puts a version on every page's CSS/JS links and an import map for all modules, so visitors
+   get the whole new release at once (GitHub Pages lets browsers keep files for 10 minutes; without a version a page
+   could load new HTML with old scripts and break until refreshed).
+3. Push to `main`.

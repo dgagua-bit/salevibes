@@ -122,3 +122,22 @@
   - The price card is labelled "cheapest <brand> in these stores".
 - "1080 V15" and "1080v15" count as the same model.
 - `live-search` asks each store for 10 results (Shopify's maximum), up from 8.
+
+## Search: reliability and result quality (from real searches that went wrong)
+- **live-search no longer serves a bad moment for 30 minutes.**
+  - A store that answers 429/5xx or times out is retried once.
+  - Answers where under 70% of stores responded are kept for 2 minutes only, flagged `partial`, and the page says so.
+  - Each store's currency is remembered in `stores.search_currency` (refreshed weekly), so every search sends half as many requests to the stores.
+- **Matching:**
+  - Filler words in queries are ignored ("aventus by creed").
+  - Numbers and 1–2-letter words match whole words only ("90" ≠ "9060", "6" ≠ "1906", "on" ≠ "lotion").
+  - Typos are forgiven only in words of 6+ letters ("lloyd" ≠ "floyd").
+- **Brand focus:**
+  - When the query names a brand, other brands go to "similar". With equally good candidates, the brand exactly named wins ("lloyd": LLOYD over Milton-Lloyd).
+  - When no brand is named but one dominates, knock-offs go to "similar" ("aventus" → Creed, not "Yacht Man Aventus").
+  - Results without a brand count only when the title leads with the brand or credits it ("by Christian Dior"). "Funko … Gage Creed" does not count.
+  - Vendor codes ("2718", "R2808") are not brands, and no longer appear in front of titles.
+- **Side products:** bundles, gift sets, vials and combo packs go to "similar".
+- **No exact match:** the closest results (≥ 2/3 of the words) are shown instead of an empty page, on the search page, in the home-page finder and in the tools box.
+- The sales page links a typed query to the product search.
+- `tests/search.test.mjs`: the rules above, checked offline on the real cases. `npm test` runs both unit suites.

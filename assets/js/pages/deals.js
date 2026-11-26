@@ -116,7 +116,8 @@ function render() {
   const P = showP ? filterOffers() : [], D = showD ? filterDeals() : [];
   const priceSort = S.sort === "price" || S.sort === "landed";
 
-  let html = "";
+  // this page filters sales and our catalogue; a typed product is best looked up in the stores themselves
+  let html = S.q ? `<p class="fine">კონკრეტულ პროდუქტს ეძებ? <a class="link" href="search.html?q=${encodeURIComponent(S.q)}">„${esc(S.q)}“ — საუკეთესო ფასი მაღაზიებში →</a></p>` : "";
   if (showP) {
     html += `<div class="subhead"><h2>პროდუქტები</h2><p>${P.length} პროდუქტი · ფასი, ისტორია, ქულა</p></div>`;
     html += P.length ? `<div class="grid">${P.slice(0, S.limitP).map(offerCard).join("")}</div>${P.length > S.limitP ? `<div class="more"><button class="btn btn-ghost" id="more-p" type="button">მეტის ნახვა (+${P.length - S.limitP})</button></div>` : ""}`

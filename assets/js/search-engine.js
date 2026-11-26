@@ -19,10 +19,14 @@ const KA = { ა: "a", ბ: "b", გ: "g", დ: "d", ე: "e", ვ: "v", ზ: "z
 export const SYN = { "ფეხსაცმელი": "shoe", "სნიკერი": "sneaker", "სნიკერები": "sneaker", "სუნამო": "parfum", "ჩანთა": "bag", "საათი": "watch", "სათვალე": "sunglasses", "კაბა": "dress", "ქურთუკი": "jacket", "მაისური": "shirt", "ჯინსი": "jeans", "ქალის": "women", "კაცის": "men", "ბავშვის": "kids", "კრემი": "cream" };
 const BRAND_KA = { "ნაიკი": "nike", "ადიდასი": "adidas", "პუმა": "puma", "გუჩი": "gucci", "პრადა": "prada", "დიორი": "dior", "შანელი": "chanel", "ზარა": "zara", "მანგო": "mango", "ლევისი": "levis", "ნიუ ბალანსი": "new balance", "ბალენსიაგა": "balenciaga", "ვერსაჩე": "versace", "არმანი": "armani", "კელვინ კლაინი": "calvin klein", "ტომი": "tommy", "ლაკოსტი": "lacoste", "სპიდო": "speedo" };
 export const norm = s => String(s || "").toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/['’`]/g, "").replace(/[^a-z0-9\u10d0-\u10ff]+/g, " ").trim();
+// filler words in a query: "aventus by creed" means "aventus creed" (store titles rarely say "by")
+const QSTOP = new Set("by for the and of with de du la le in a an to from pour et y e und".split(" "));
 export function queryTerms(q) {
   let s = norm(q);
   for (const [k, v] of Object.entries(BRAND_KA)) s = s.replace(k, v);
-  return s.split(" ").filter(Boolean).map(t => SYN[t] || (/[\u10d0-\u10ff]/.test(t) ? [...t].map(c => KA[c] || c).join("") : t));
+  const all = s.split(" ").filter(Boolean).map(t => SYN[t] || (/[\u10d0-\u10ff]/.test(t) ? [...t].map(c => KA[c] || c).join("") : t));
+  const kept = all.filter(t => !QSTOP.has(t));
+  return kept.length ? kept : all;
 }
 function lev(a, b) {
   if (Math.abs(a.length - b.length) > 2) return 9;
@@ -37,8 +41,14 @@ export function relevance(terms, text) {
   const words = hay.split(" "), joined = hay.replace(/ /g, "");
   let hit = 0;
   for (const t of terms) {
+    if (/^\d+$/.test(t)) { // a model number: whole number, may carry letters around it (9060 ↔ U9060, 1080 ↔ 1080v15) but no extra digits
+      const re = new RegExp(`^[a-z]{0,3}${t}(?![0-9])`);
+      if (words.some(w => re.test(w))) hit++;
+      continue;
+    }
+    if (t.length <= 2) { if (words.includes(t)) hit++; continue; }
     if (hay.includes(t) || joined.includes(t)) { hit++; continue; }
-    if (t.length >= 5 && !/\d/.test(t) && words.some(w => w.length >= 4 && lev(t, w) <= (t.length >= 8 ? 2 : 1))) hit++; // typos only in longer words — "zara" must not match "yara"
+    if (t.length >= 6 && !/\d/.test(t) && words.some(w => w.length >= 5 && lev(t, w) <= (t.length >= 9 ? 2 : 1))) hit++; // typos only in longer words — "lloyd" must not match "floyd"
   }
   return terms.length ? hit / terms.length : 0;
 }
@@ -70,7 +80,7 @@ export function productKey(title) {
 }
 // kids' versions and side products (Sauvage deodorant, Samba laces) are not what people mean by the product name
 const KIDS = /\b(kids?|junior|jr|baby|babies|infants?|toddlers?|child|children|boys|girls|youth|gs|ps|td)\b/;
-const SIDE = /\b(deodorant|deo|shower gel|body lotion|lotion|aftershave|after shave|socks?|laces?|insoles?|cleaner|samples?|miniature|keyrings?|keychains?)\b/;
+const SIDE = /\b(deodorant|deo|shower gel|body lotion|lotion|aftershave|after shave|socks?|laces?|insoles?|cleaner|samples?|miniature|keyrings?|keychains?|bundle|gift ?sets?|coffret|discovery set|sampler|travel set|mini set|duo set|value set|vials?|combo|\d ?pcs)\b/;
 export const secondary = (title, q) => { const t = norm(title), qq = norm(q); return (KIDS.test(t) && !KIDS.test(qq)) || (SIDE.test(t) && !SIDE.test(qq)); };
 
 /* brand names typed without spaces ("newbalance", "calvinklein") → the spaced form store titles use.
@@ -119,6 +129,34 @@ export function modelChipsHTML(models, baseQuery, brand) {
     <small class="srch-hint">${models.length ? "სხვა მოდელი? " : ""}ჩაწერე ძიებაში ბრენდი და მოდელი ერთად, მაგ. „${esc(brand)} ${esc(models[0]?.model.toUpperCase() || "…")}“ — ასე შევადარებთ ზუსტად იმ პროდუქტს.</small></div>`;
 }
 
+/* ---------- brand focus ----------
+   "creed" should not rank a Funko figure called "… Gage Creed" first, and "lloyd" means LLOYD shoes, not Milton-Lloyd.
+   When the query names a brand, results of other brands are only "similar". When it names none but one brand clearly
+   dominates the matches ("aventus" → Creed), knock-offs from other brands are "similar" too. */
+const BRAND_GENERIC = new Set("the co company inc ltd llc spa gmbh official store shop christian maison parfums parfum perfumes fragrances beauty cosmetics studio atelier house paris london milano milan".split(" "));
+const BRAND_SUFFIX_RE = /\b(running|sportswear|originals|performance|kids|men|women|official|inc|ltd|llc|spa|gmbh)\b/g;
+const withPhrases = s => { let x = " " + s + " "; for (const [re, v] of PHRASES) x = x.replace(re, v); return x.replace(/\s+/g, " ").trim(); };
+export const brandCore = b => withPhrases(norm(b).replace(BRAND_SUFFIX_RE, " "));
+const sigWords = core => core.split(" ").filter(w => (w.length >= 3 || w === "nb" || w === "dg") && !BRAND_GENERIC.has(w));
+/** The set of brand cores the results should focus on, or null (no brand preference). */
+export function brandFocus(items, terms) {
+  const q = new Set(withPhrases(terms.join(" ")).split(" ").concat(terms));
+  const info = new Map();
+  for (const it of items) {
+    if (!it.brand) continue;
+    const c = brandCore(it.brand); if (!c || info.has(c)) continue;
+    const sw = sigWords(c); if (!sw.length) continue;
+    const matched = sw.filter(w => q.has(w)).length;
+    info.set(c, { matched, extra: sw.length - matched });
+  }
+  const named = [...info].filter(([, v]) => v.matched > 0);
+  if (named.length) { const least = Math.min(...named.map(([, v]) => v.extra)); return new Set(named.filter(([, v]) => v.extra === least).map(([c]) => c)); }
+  const counts = new Map(); let withBrand = 0;
+  for (const it of items) if (it.brand) { withBrand++; const c = brandCore(it.brand); counts.set(c, (counts.get(c) || 0) + 1); }
+  const top = [...counts].sort((a, b) => b[1] - a[1])[0];
+  return top && top[1] >= 2 && top[1] / withBrand >= 0.5 ? new Set([top[0]]) : null;
+}
+
 /** Clusters items by productKey; sets it.group on each item. Groups sold by the most stores first. */
 export function groupItems(list) {
   const m = new Map();
@@ -134,10 +172,19 @@ export function groupItems(list) {
 const guessCat = t => /sneaker|shoe|boot|loafer|sandal|trainer|heel|mule/i.test(t) ? "shoes" : /parfum|eau de|perfume|cream|serum|lipstick|mascara/i.test(t) ? "beauty" : /watch/i.test(t) ? "watches" : /bag|wallet|sunglass|belt/i.test(t) ? "accessories" : "fashion";
 
 /* ---------- sources ---------- */
+// searches from local tests are not written to the admin panel's search statistics
+const IS_TEST = typeof location === "undefined" || /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
 async function liveSearch(q) {
-  const r = await fetch(`${SUPABASE_URL}/functions/v1/live-search`, { method: "POST", headers: { apikey: SUPABASE_KEY, "Content-Type": "application/json" }, body: JSON.stringify({ q }), signal: AbortSignal.timeout(25000) });
+  const r = await fetch(`${SUPABASE_URL}/functions/v1/live-search`, { method: "POST", headers: { apikey: SUPABASE_KEY, "Content-Type": "application/json" }, body: JSON.stringify(IS_TEST ? { q, test: true } : { q }), signal: AbortSignal.timeout(25000) });
   if (!r.ok) throw new Error("live " + r.status);
   return r.json();
+}
+/** A store's "brand" field, or null when it is a code or filler rather than a brand name. */
+export function cleanBrand(b) {
+  const t = String(b || "").trim();
+  if (!t || /^[a-z]{0,2}[-\s]?\d+[a-z]?$/i.test(t) || (t.match(/[a-z\u00c0-\u024f]/gi) || []).length < 2) return null;
+  if (/\b(bundle|save|sale|gift|default|vendor|unknown|various|n\/a)\b/i.test(t)) return null;
+  return t;
 }
 function fromOffers(rows) {
   return (rows || []).map(o => { const p = o.products || {}, s = p.stores || {};
@@ -152,9 +199,10 @@ function priceItem(it, fx) {
 }
 
 /**
- * Runs the search. Returns { q, terms, fx, items, similar, live }:
- *   items   — every query word matches, not a kids'/side product (unless asked for), priced in GEL
- *   similar — kids'/side products and partial matches (≥ half of the words)
+ * Runs the search. Returns { q, terms, fx, items, similar, close, live }:
+ *   items   — every query word matches, not a kids'/side product (unless asked for), of the brand the query is about
+ *   similar — kids'/side products, other brands, partial matches (≥ half of the words)
+ *   close   — when nothing matches exactly: the nearest partial matches (≥ 2/3 of the words)
  *   live    — live-search meta ({ stores_answered, at }) or null when it was unavailable
  */
 export async function findProducts(q, { fx } = {}) {
@@ -162,21 +210,42 @@ export async function findProducts(q, { fx } = {}) {
   const [fxr, live, offers, cmp] = await Promise.allSettled([fx && Object.keys(fx).length ? Promise.resolve({ fx }) : getFx(), liveSearch(terms.join(" ")), getOffers(), searchCompare(terms.join(" "))]);
   const FX = fxr.status === "fulfilled" ? fxr.value.fx || {} : {};
   const all = [
-    ...(live.status === "fulfilled" ? live.value.items || [] : []).map(x => ({ ...x, src: "live" })),
+    ...(live.status === "fulfilled" ? live.value.items || [] : []).map(x => ({ ...x, brand: cleanBrand(x.brand), side: /bundle|gift|\bset\b/i.test(x.brand || ""), src: "live" })),
     ...fromOffers(offers.status === "fulfilled" ? offers.value : []),
     ...fromCompare(cmp.status === "fulfilled" ? cmp.value : [])
-  ].filter(x => x.price > 0 && x.url && x.title);
+  ];
+  return { q, terms, fx: FX, ...rankResults(all, q, terms, FX), live: live.status === "fulfilled" ? live.value : null };
+}
+
+/** Matching, pricing and sorting into main results / similar / closest. Pure — the unit tests call it directly. */
+export function rankResults(all, q, terms, fx) {
   const seen = new Set(), scored = [];
   for (const it of all) {
+    if (!(it.price > 0 && it.url && it.title)) continue;
     const key = (it.url || "").split("?")[0] + "|" + it.currency; if (seen.has(key)) continue; seen.add(key);
     const r = relevance(terms, `${it.brand || ""} ${it.title}`);
-    if (r > 0) scored.push({ ...priceItem(it, FX), rel: r });
+    if (r > 0) scored.push({ ...priceItem(it, fx), rel: r });
   }
+  const exact = scored.filter(x => x.rel === 1);
+  const focus = brandFocus(exact.filter(x => !x.side && !secondary(x.title, q)), terms);
+  // no brand field: the title must lead with the brand ("Creed Aventus…", "Men's Nike…") or credit it ("Sauvage by Christian Dior");
+  // a brand word further along is something else ("Funko Pop … Gage Creed", "Dumont … (Creed Aventus Twist)")
+  const LEAD = new Set("mens men womens women kids unisex the new sale".split(" "));
+  const titleNames = t => {
+    const w = withPhrases(norm(t)).split(" "); let i = 0;
+    while (i < w.length - 1 && (LEAD.has(w[i]) || /^\d+$/.test(w[i]))) i++;
+    return [...focus].some(c => { const sw = sigWords(c); if (!sw.length) return true;
+      const at = k => sw.every((x, j) => w[k + j] === x);
+      return at(i) || w.some((x, k) => x === "by" && at(k + 1)); });
+  };
+  const inFocus = x => !focus || (x.brand ? focus.has(brandCore(x.brand)) : titleNames(x.title));
+  const main = x => !x.side && !secondary(x.title, q) && inFocus(x);
+  const partial = terms.length > 1 ? scored.filter(x => x.rel < 1 && x.rel >= 0.5) : [];
   return {
-    q, terms, fx: FX,
-    items: scored.filter(x => x.rel === 1 && !secondary(x.title, q)),
-    similar: scored.filter(x => (x.rel === 1 && secondary(x.title, q)) || (terms.length > 1 && x.rel < 1 && x.rel >= 0.5)),
-    live: live.status === "fulfilled" ? live.value : null
+    items: exact.filter(main),
+    similar: [...exact.filter(x => !main(x)), ...partial],
+    // nothing exact? the nearest matches (≥ 2/3 of the words) are better than an empty page
+    close: partial.filter(x => x.rel >= 0.66 && !x.side && !secondary(x.title, q)).sort((a, b) => b.rel - a.rel)
   };
 }
 
@@ -219,6 +288,15 @@ export function bestCardHTML(best, { label = "საუკეთესო ფა
       <p class="srch-actions">${buyBtn(best)} ${saveBtn(best)}</p>
     </div></article>`;
 }
+/** Nothing matched every word: the nearest results, cheapest in Georgia first — never an empty page when something is close. */
+export function closestHTML(close, q, limit = 8) {
+  const list = sortItems(close).slice(0, limit);
+  if (!list.length) return "";
+  return `<h3 class="srch-h">„${esc(q)}“ ზუსტად ვერ ვიპოვეთ <small>— ყველაზე ახლოს მყოფი შედეგები, დალაგებული საქართველოში ჯამური ფასით</small></h3><ol class="srch-list">${list.map((x, i) => rowHTML(x, i)).join("")}</ol>`;
+}
+/** A warning when some stores did not answer (rate limits, outages), so an incomplete result is not taken as complete. */
+export const liveNote = live => !live ? " მაღაზიების პირდაპირი ძიება ახლა მიუწვდომელია — ნაჩვენებია მხოლოდ ჩვენი კატალოგი, სცადე წუთში."
+  : live.partial ? ` ${live.stores_searched - live.stores_answered} მაღაზიამ ახლა არ გვიპასუხა — შედეგი შეიძლება არასრული იყოს, სცადე წუთში.` : "";
 export const listHeadHTML = () => `<div class="srch-head" aria-hidden="true"><span></span><span></span><span>პროდუქტი</span><span>მაღაზიაში</span><span>საქართველოში</span><span></span></div>`;
 export function rowHTML(it, i) {
   return `<li class="srch-row${it.in_stock ? "" : " is-out"}">
